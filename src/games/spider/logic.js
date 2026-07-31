@@ -213,34 +213,42 @@ function checkCompleteRun(state, colIndex) {
   const column = state.tableau[colIndex];
   if (column.length < 13) return false;
 
-  const start = column.length - 13;
-  const run = column.slice(start);
+  // Look for any complete A→K run of the same suit anywhere in the column
+  for (let start = 0; start <= column.length - 13; start++) {
+    const run = column.slice(start, start + 13);
 
-  // Run in array is [A (bottom), 2, 3, ..., K (top)]
-  // Must be A→K of the same suit
-  const suit = run[0].suit;
-  if (run[0].rank !== 'A') return false;
-  for (let i = 0; i < 12; i++) {
-    if (run[i].suit !== suit || rankValue(run[i].rank) !== rankValue(run[i + 1].rank) - 1) {
-      return false;
+    // Must be A→K of the same suit
+    const suit = run[0].suit;
+    if (run[0].rank !== 'A') continue;
+    let valid = true;
+    for (let i = 0; i < 12; i++) {
+      if (run[i].suit !== suit || rankValue(run[i].rank) !== rankValue(run[i + 1].rank) - 1) {
+        valid = false;
+        break;
+      }
     }
-  }
-  if (run[12].rank !== 'K') return false;
+    if (!valid || run[12].rank !== 'K') continue;
 
-  // Remove the run
-  column.splice(start);
-  state.score += 100;
+    // Found a complete run — remove it
+    column.splice(start, 13);
+    state.score += 100;
 
-  // Flip new top card
-  if (column.length > 0) {
-    const newTop = column[column.length - 1];
-    if (!newTop.faceUp) {
-      newTop.faceUp = true;
+    // Flip new top card if any card below was face-down
+    if (start > 0 && column[start - 1] && !column[start - 1].faceUp) {
+      column[start - 1].faceUp = true;
       state.score += 5;
+    } else if (column.length > 0) {
+      const newTop = column[column.length - 1];
+      if (!newTop.faceUp) {
+        newTop.faceUp = true;
+        state.score += 5;
+      }
     }
+
+    return true;
   }
 
-  return true;
+  return false;
 }
 
 /* ─── Draw ─── */
