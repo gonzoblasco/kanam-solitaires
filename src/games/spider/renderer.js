@@ -37,6 +37,7 @@ function stopTimerDisplay() {
 
 export function renderSpider(container, state, isNew = false) {
   currentState = state;
+  window.__spiderState__ = state;
   stopTimerDisplay();
   container.innerHTML = '';
   const table = document.createElement('div');
