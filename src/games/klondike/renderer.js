@@ -3,6 +3,7 @@
  */
 
 import { createCardElement } from '../../lib/dom.js';
+import { showModal } from '../../lib/modal.js';
 import {
   createKlondike,
   drawStock,
@@ -139,10 +140,21 @@ export function renderKlondike(container, state) {
   const newGameBtn = document.createElement('button');
   newGameBtn.className = 'action-btn new-game-btn';
   newGameBtn.textContent = '♠ New Game';
-  newGameBtn.addEventListener('click', () => {
+  newGameBtn.addEventListener('click', async () => {
     clearHint();
-    if (state.moves === 0 || confirm('Start a new game? Current progress will be lost.')) {
-      const newState = createKlondike(state.drawMode);
+    if (state.moves === 0) {
+      const newState = createKlondike(state.drawMode, state.scoringMode);
+      renderKlondike(document.getElementById('game-container'), newState);
+      return;
+    }
+    const confirmed = await showModal({
+      title: 'New Game',
+      message: 'Start a new game? Current progress will be lost.',
+      confirmText: 'New Game',
+      cancelText: 'Cancel',
+    });
+    if (confirmed) {
+      const newState = createKlondike(state.drawMode, state.scoringMode);
       renderKlondike(document.getElementById('game-container'), newState);
     }
   });
