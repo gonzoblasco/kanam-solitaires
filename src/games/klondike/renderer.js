@@ -13,6 +13,7 @@ import {
   foundationToTableau,
   getTableauRunStart,
   findAutoDestination,
+  findHint,
   undo,
   autoComplete,
   isGameWon,
@@ -97,7 +98,7 @@ export function renderKlondike(container, state) {
 
   container.appendChild(table);
 
-  // Bottom bar: undo, auto-complete, new game
+  // Bottom bar: undo, hint, auto-complete, new game
   const bottomBar = document.createElement('div');
   bottomBar.className = 'bottom-bar';
 
@@ -106,15 +107,29 @@ export function renderKlondike(container, state) {
   undoBtn.textContent = '↩ Undo';
   undoBtn.disabled = state.history.length === 0;
   undoBtn.addEventListener('click', () => {
+    clearHint();
     undo(state);
     rerender(state);
   });
   bottomBar.appendChild(undoBtn);
 
+  const hintBtn = document.createElement('button');
+  hintBtn.className = 'action-btn';
+  hintBtn.textContent = '💡 Hint';
+  hintBtn.addEventListener('click', () => {
+    clearHint();
+    const hint = findHint(state);
+    if (hint) {
+      showHint(hint);
+    }
+  });
+  bottomBar.appendChild(hintBtn);
+
   const autoBtn = document.createElement('button');
   autoBtn.className = 'action-btn';
   autoBtn.textContent = '✨ Auto';
   autoBtn.addEventListener('click', () => {
+    clearHint();
     const moved = autoComplete(state);
     if (moved > 0) rerender(state);
   });
@@ -124,6 +139,7 @@ export function renderKlondike(container, state) {
   newGameBtn.className = 'action-btn new-game-btn';
   newGameBtn.textContent = '♠ New Game';
   newGameBtn.addEventListener('click', () => {
+    clearHint();
     if (state.moves === 0 || confirm('Start a new game? Current progress will be lost.')) {
       const newState = createKlondike(state.drawMode);
       renderKlondike(document.getElementById('game-container'), newState);
@@ -353,4 +369,40 @@ function createColumnElement(state, colIndex) {
 
   el.appendChild(pileEl);
   return el;
+}
+
+/* ─── Hint Highlight ─── */
+
+function clearHint() {
+  document.querySelectorAll('.hint-source, .hint-target').forEach((el) => {
+    el.classList.remove('hint-source', 'hint-target');
+  });
+}
+
+function showHint(hint) {
+  // Find source element
+  let sourceEl = null;
+  if (hint.source === 'waste') {
+    sourceEl = document.querySelector('.waste-pile .card:last-child');
+  } else if (hint.source === 'tableau') {
+    const col = document.querySelectorAll('.klondike-column')[hint.sourceIndex];
+    if (col) {
+      const cards = col.querySelectorAll('.card');
+      sourceEl = cards[hint.cardIndex];
+    }
+  }
+
+  // Find dest element
+  let destEl = null;
+  if (hint.dest === 'foundation') {
+    destEl = document.querySelectorAll('.foundation')[hint.destIndex];
+  } else if (hint.dest === 'tableau') {
+    destEl = document.querySelectorAll('.klondike-column')[hint.destIndex];
+  }
+
+  if (sourceEl) sourceEl.classList.add('hint-source');
+  if (destEl) destEl.classList.add('hint-target');
+
+  // Auto-clear hint after 3 seconds
+  setTimeout(clearHint, 3000);
 }

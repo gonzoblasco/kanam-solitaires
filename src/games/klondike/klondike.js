@@ -356,6 +356,70 @@ export function findAutoDestination(state, card, sourceType, sourceIndex, cardIn
   return null;
 }
 
+/* ─── Hint ─── */
+
+/**
+ * Find a valid move to suggest.
+ * Priority:
+ *   1. Waste → foundation
+ *   2. Tableau top → foundation
+ *   3. Waste → tableau
+ *   4. Tableau run → tableau
+ * Returns { source, sourceIndex, cardIndex, dest, destIndex } or null.
+ */
+export function findHint(state) {
+  // 1. Waste → foundation
+  if (state.waste.length > 0) {
+    const card = state.waste[state.waste.length - 1];
+    for (let i = 0; i < 4; i++) {
+      if (canMoveToFoundation(card, state.foundations[i])) {
+        return { source: 'waste', sourceIndex: null, cardIndex: null, dest: 'foundation', destIndex: i };
+      }
+    }
+  }
+
+  // 2. Tableau top → foundation
+  for (let col = 0; col < 7; col++) {
+    const column = state.tableau[col];
+    if (column.length === 0) continue;
+    const card = column[column.length - 1];
+    if (!card.faceUp) continue;
+    for (let i = 0; i < 4; i++) {
+      if (canMoveToFoundation(card, state.foundations[i])) {
+        return { source: 'tableau', sourceIndex: col, cardIndex: column.length - 1, dest: 'foundation', destIndex: i };
+      }
+    }
+  }
+
+  // 3. Waste → tableau
+  if (state.waste.length > 0) {
+    const card = state.waste[state.waste.length - 1];
+    for (let i = 0; i < 7; i++) {
+      if (canMoveToTableau(card, state.tableau[i])) {
+        return { source: 'waste', sourceIndex: null, cardIndex: null, dest: 'tableau', destIndex: i };
+      }
+    }
+  }
+
+  // 4. Tableau run → tableau
+  for (let srcCol = 0; srcCol < 7; srcCol++) {
+    const column = state.tableau[srcCol];
+    for (let cardIdx = 0; cardIdx < column.length; cardIdx++) {
+      const runStart = getTableauRunStart(column, cardIdx);
+      if (runStart === -1) continue;
+      const runCard = column[runStart];
+      for (let dstCol = 0; dstCol < 7; dstCol++) {
+        if (dstCol === srcCol) continue;
+        if (canMoveToTableau(runCard, state.tableau[dstCol])) {
+          return { source: 'tableau', sourceIndex: srcCol, cardIndex: runStart, dest: 'tableau', destIndex: dstCol };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 /* ─── Auto-complete ─── */
 
 /**

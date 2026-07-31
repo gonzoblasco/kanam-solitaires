@@ -244,6 +244,35 @@ body {
   z-index: 9999;
 }
 
+/* Hint highlight */
+.card.hint-source {
+  box-shadow:
+    0 0 0 3px var(--color-gold),
+    0 0 12px rgba(212, 160, 23, 0.5);
+  animation: hintPulse 1s ease-in-out infinite;
+}
+
+.foundation.hint-target,
+.klondike-column.hint-target {
+  position: relative;
+}
+
+.foundation.hint-target::after,
+.klondike-column.hint-target::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--color-gold);
+  border-radius: 10px;
+  animation: hintPulse 1s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes hintPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 /* ─── Piles ─── */
 .pile {
   position: relative;
