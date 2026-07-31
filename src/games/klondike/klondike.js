@@ -6,9 +6,13 @@
  *   - Waste: drawn cards (face up)
  *   - Foundations: 4 piles, one per suit, A→K ascending
  *   - Tableau: 7 columns, cards build down in alternating colors
+ *
+ * Variant rules:
+ *   - Cards can be moved from foundations back to tableau (permissive)
+ *   - Undo support via history stack
  */
 
-import { createDeck, shuffle, rankValue, isRed, isBlack } from '../../lib/card.js';
+import { createDeck, shuffle, rankValue, isRed } from '../../lib/card.js';
 
 export function createKlondike() {
   const deck = shuffle(createDeck());
@@ -38,14 +42,59 @@ export function createKlondike() {
     tableau,
     score: 0,
     moves: 0,
+    history: [],
   };
 }
+
+/* ─── Snapshot for undo ─── */
+
+function snapshot(state) {
+  return {
+    stock: state.stock.map(c => ({ ...c })),
+    waste: state.waste.map(c => ({ ...c })),
+    foundations: state.foundations.map(f => f.map(c => ({ ...c }))),
+    tableau: state.tableau.map(col => col.map(c => ({ ...c }))),
+    score: state.score,
+    moves: state.moves,
+  };
+}
+
+function restore(state, snap) {
+  state.stock = snap.stock;
+  state.waste = snap.waste;
+  state.foundations = snap.foundations;
+  state.tableau = snap.tableau;
+  state.score = snap.score;
+  state.moves = snap.moves;
+}
+
+function pushUndo(state) {
+  state.history.push(snapshot(state));
+  // Keep max 50 undo steps
+  if (state.history.length > 50) {
+    state.history.shift();
+  }
+}
+
+/**
+ * Undo the last move.
+ */
+export function undo(state) {
+  if (state.history.length === 0) return false;
+  const snap = state.history.pop();
+  restore(state, snap);
+  return true;
+}
+
+/* ─── Stock & Waste ─── */
 
 /**
  * Draw from stock → waste.
  * If stock is empty, flip waste back to stock.
  */
 export function drawStock(state) {
+  pushUndo(state);
+
   if (state.stock.length > 0) {
     const card = state.stock.pop();
     card.faceUp = true;
@@ -65,8 +114,12 @@ export function drawStock(state) {
     return true;
   }
 
+  // No-op, pop the undo we just pushed
+  state.history.pop();
   return false;
 }
+
+/* ─── Validation ─── */
 
 /**
  * Can a card be placed on a foundation pile?
@@ -92,6 +145,8 @@ export function canMoveToTableau(card, column) {
   return cardColor !== topColor && rankValue(card.rank) === rankValue(top.rank) - 1;
 }
 
+/* ─── Waste moves ─── */
+
 /**
  * Move top card of waste to foundation.
  */
@@ -99,6 +154,7 @@ export function wasteToFoundation(state, foundationIndex) {
   if (state.waste.length === 0) return false;
   const card = state.waste[state.waste.length - 1];
   if (!canMoveToFoundation(card, state.foundations[foundationIndex])) return false;
+  pushUndo(state);
   state.foundations[foundationIndex].push(state.waste.pop());
   state.score += 10;
   state.moves++;
@@ -112,14 +168,16 @@ export function wasteToTableau(state, columnIndex) {
   if (state.waste.length === 0) return false;
   const card = state.waste[state.waste.length - 1];
   if (!canMoveToTableau(card, state.tableau[columnIndex])) return false;
+  pushUndo(state);
   state.tableau[columnIndex].push(state.waste.pop());
   state.moves++;
   return true;
 }
 
+/* ─── Tableau moves ─── */
+
 /**
- * Move card(s) from one tableau column to another.
- * Returns the index of the card in the source column where the run starts.
+ * Returns the index of the card in the column where the valid run starts.
  */
 export function getTableauRunStart(column, cardIndex) {
   if (cardIndex < 0 || cardIndex >= column.length) return -1;
@@ -148,11 +206,11 @@ export function moveTableauRun(state, sourceCol, cardIndex, targetCol) {
 
   const cards = state.tableau[sourceCol].splice(runStart);
   if (!canMoveToTableau(cards[0], state.tableau[targetCol])) {
-    // Put them back
     state.tableau[sourceCol].push(...cards);
     return false;
   }
 
+  pushUndo(state);
   state.tableau[targetCol].push(...cards);
 
   // Flip the new top card of source column if face down
@@ -178,6 +236,7 @@ export function tableauToFoundation(state, colIndex, foundationIndex) {
   if (!card.faceUp) return false;
   if (!canMoveToFoundation(card, state.foundations[foundationIndex])) return false;
 
+  pushUndo(state);
   state.foundations[foundationIndex].push(column.pop());
 
   // Flip new top card if face down
@@ -194,12 +253,30 @@ export function tableauToFoundation(state, colIndex, foundationIndex) {
   return true;
 }
 
+/* ─── Foundation → Tableau (permissive variant) ─── */
+
 /**
- * Auto-move: find the best destination for a card (or run) on double-click.
+ * Move top card of a foundation back to a tableau column.
+ */
+export function foundationToTableau(state, foundationIndex, colIndex) {
+  const foundation = state.foundations[foundationIndex];
+  if (foundation.length === 0) return false;
+  const card = foundation[foundation.length - 1];
+  if (!canMoveToTableau(card, state.tableau[colIndex])) return false;
+
+  pushUndo(state);
+  state.tableau[colIndex].push(foundation.pop());
+  state.moves++;
+  return true;
+}
+
+/* ─── Auto-move (double-click) ─── */
+
+/**
+ * Find the best destination for a card (or run) on double-click.
  * Priority:
  *   1. Foundation (if the card can go there)
  *   2. Tableau column (if the card can be placed)
- * Returns { type: 'foundation'|'tableau', index } or null if no valid move.
  */
 export function findAutoDestination(state, card, sourceType, sourceIndex, cardIndex) {
   // 1. Try foundations first (only for single cards, not runs)
@@ -211,7 +288,7 @@ export function findAutoDestination(state, card, sourceType, sourceIndex, cardIn
     }
   }
 
-  // 2. Try tableau columns (for runs or cards that didn't fit a foundation)
+  // 2. Try tableau columns
   for (let i = 0; i < 7; i++) {
     if (sourceType === 'tableau' && i === sourceIndex) continue;
     if (canMoveToTableau(card, state.tableau[i])) {
@@ -222,18 +299,8 @@ export function findAutoDestination(state, card, sourceType, sourceIndex, cardIn
   return null;
 }
 
-/**
- * Execute an auto-move (double-click action).
- */
-export function executeAutoMove(state, dest) {
-  if (!dest) return false;
-  // The move was already executed by the caller; this is a no-op helper
-  return true;
-}
+/* ─── Win ─── */
 
-/**
- * Check if the game is won (all foundations complete).
- */
 export function isGameWon(state) {
   return state.foundations.every(f => f.length === 13);
 }

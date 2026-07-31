@@ -9,8 +9,10 @@ import {
   wasteToTableau,
   moveTableauRun,
   tableauToFoundation,
+  foundationToTableau,
   getTableauRunStart,
   findAutoDestination,
+  undo,
   isGameWon,
 } from './klondike.js';
 
@@ -55,7 +57,18 @@ export function renderKlondike(container, state) {
 
   container.appendChild(table);
 
-  // Check win condition
+  // Undo button
+  const undoBtn = document.createElement('button');
+  undoBtn.className = 'undo-btn';
+  undoBtn.textContent = '↩ Undo';
+  undoBtn.disabled = state.history.length === 0;
+  undoBtn.addEventListener('click', () => {
+    undo(state);
+    rerender(state);
+  });
+  container.appendChild(undoBtn);
+
+  // Win banner
   if (isGameWon(state)) {
     const winBanner = document.createElement('div');
     winBanner.className = 'win-banner';
@@ -107,7 +120,6 @@ function createWasteElement(state) {
     cardEl.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', 'waste-top');
     });
-    // Double-click: auto-move waste top card
     cardEl.addEventListener('dblclick', () => {
       const dest = findAutoDestination(state, card, 'waste', null, null);
       if (dest) {
@@ -138,14 +150,20 @@ function createFoundationElement(state, index) {
   const pile = state.foundations[index];
   if (pile.length > 0) {
     const card = pile[pile.length - 1];
-    el.appendChild(createCardElement(card));
+    const cardEl = createCardElement(card);
+    // Draggable from foundation back to tableau (permissive variant)
+    cardEl.draggable = true;
+    cardEl.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', `foundation-${index}`);
+    });
+    el.appendChild(cardEl);
   } else {
     const target = document.createElement('div');
     target.className = 'pile-target';
     el.appendChild(target);
   }
 
-  // Drop target
+  // Drop target (waste → foundation, tableau → foundation)
   el.addEventListener('dragover', (e) => e.preventDefault());
   el.addEventListener('drop', (e) => {
     e.preventDefault();
@@ -156,6 +174,7 @@ function createFoundationElement(state, index) {
       const colIdx = parseInt(data.split('-')[1], 10);
       tableauToFoundation(state, colIdx, index);
     }
+    // foundation → foundation drops are ignored
     rerender(state);
   });
 
@@ -191,7 +210,6 @@ function createColumnElement(state, colIndex) {
           e.dataTransfer.setData('text/plain', `tableau-${colIndex}-${cardIndex}`);
         });
 
-        // Double-click: auto-move the run starting at this card
         cardEl.addEventListener('dblclick', () => {
           const runStart = getTableauRunStart(state.tableau[colIndex], cardIndex);
           if (runStart === -1) return;
@@ -200,7 +218,6 @@ function createColumnElement(state, colIndex) {
           const dest = findAutoDestination(state, runCard, 'tableau', colIndex, cardIndex);
           if (dest) {
             if (dest.type === 'foundation') {
-              // Only the last card can go to foundation
               if (cardIndex === column.length - 1) {
                 tableauToFoundation(state, colIndex, dest.index);
               }
@@ -215,12 +232,11 @@ function createColumnElement(state, colIndex) {
       pileEl.appendChild(cardEl);
     });
 
-    // Set pile height
     const lastCardOffset = (column.length - 1) * 24;
     pileEl.style.height = `${lastCardOffset + 112}px`;
   }
 
-  // Drop target for the column
+  // Drop target: waste → tableau, tableau → tableau, foundation → tableau
   pileEl.addEventListener('dragover', (e) => e.preventDefault());
   pileEl.addEventListener('drop', (e) => {
     e.preventDefault();
@@ -235,6 +251,9 @@ function createColumnElement(state, colIndex) {
       if (srcCol !== colIndex) {
         moveTableauRun(state, srcCol, cardIdx, colIndex);
       }
+    } else if (data.startsWith('foundation-')) {
+      const fIdx = parseInt(data.split('-')[1], 10);
+      foundationToTableau(state, fIdx, colIndex);
     }
 
     rerender(state);
