@@ -21,6 +21,15 @@ export function renderKlondike(container, state) {
   const table = document.createElement('div');
   table.className = 'klondike-tableau';
 
+  // Score bar
+  const scoreBar = document.createElement('div');
+  scoreBar.className = 'score-bar';
+  scoreBar.innerHTML = `
+    <span>Score: <span class="score-value">${state.score}</span></span>
+    <span>Moves: <span class="moves-value">${state.moves}</span></span>
+  `;
+  table.appendChild(scoreBar);
+
   // Top row: stock, waste, foundations
   const topRow = document.createElement('div');
   topRow.className = 'klondike-top';
@@ -151,7 +160,6 @@ function createFoundationElement(state, index) {
   if (pile.length > 0) {
     const card = pile[pile.length - 1];
     const cardEl = createCardElement(card);
-    // Draggable from foundation back to tableau (permissive variant)
     cardEl.draggable = true;
     cardEl.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', `foundation-${index}`);
@@ -163,10 +171,17 @@ function createFoundationElement(state, index) {
     el.appendChild(target);
   }
 
-  // Drop target (waste → foundation, tableau → foundation)
-  el.addEventListener('dragover', (e) => e.preventDefault());
+  // Drop target
+  el.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    el.classList.add('drag-over');
+  });
+  el.addEventListener('dragleave', () => {
+    el.classList.remove('drag-over');
+  });
   el.addEventListener('drop', (e) => {
     e.preventDefault();
+    el.classList.remove('drag-over');
     const data = e.dataTransfer.getData('text/plain');
     if (data === 'waste-top') {
       wasteToFoundation(state, index);
@@ -174,7 +189,6 @@ function createFoundationElement(state, index) {
       const colIdx = parseInt(data.split('-')[1], 10);
       tableauToFoundation(state, colIdx, index);
     }
-    // foundation → foundation drops are ignored
     rerender(state);
   });
 
@@ -236,10 +250,17 @@ function createColumnElement(state, colIndex) {
     pileEl.style.height = `${lastCardOffset + 112}px`;
   }
 
-  // Drop target: waste → tableau, tableau → tableau, foundation → tableau
-  pileEl.addEventListener('dragover', (e) => e.preventDefault());
+  // Drop target
+  pileEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    pileEl.classList.add('drag-over');
+  });
+  pileEl.addEventListener('dragleave', () => {
+    pileEl.classList.remove('drag-over');
+  });
   pileEl.addEventListener('drop', (e) => {
     e.preventDefault();
+    pileEl.classList.remove('drag-over');
     const data = e.dataTransfer.getData('text/plain');
 
     if (data === 'waste-top') {
