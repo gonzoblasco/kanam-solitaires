@@ -18,15 +18,27 @@ const SUIT_GROUPS = {
   4: [['♠'], ['♥'], ['♦'], ['♣']],
 };
 
+const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+
 export function createSpider(difficulty = 1) {
-  // Build 2 decks with the right suits
   const suitGroups = SUIT_GROUPS[difficulty] || SUIT_GROUPS[1];
   const suits = suitGroups.flat();
   const cards = [];
-  for (let d = 0; d < 2; d++) {
-    for (const suit of suits) {
-      for (const rank of ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']) {
-        cards.push({ suit, rank, value: rankValue(rank), color: isRed(suit) ? 'red' : 'black', faceUp: false, id: `${suit}-${rank}-${d}` });
+
+  if (difficulty === 1) {
+    // 1 suit: 8 copies of each rank (104 cards total, all same suit)
+    for (let i = 0; i < 8; i++) {
+      for (const rank of RANKS) {
+        cards.push({ suit: '♠', rank, value: rankValue(rank), color: 'black', faceUp: false, id: `♠-${rank}-${i}` });
+      }
+    }
+  } else {
+    // 2 or 4 suits: 2 full decks with the selected suits
+    for (let d = 0; d < 2; d++) {
+      for (const suit of suits) {
+        for (const rank of RANKS) {
+          cards.push({ suit, rank, value: rankValue(rank), color: isRed(suit) ? 'red' : 'black', faceUp: false, id: `${suit}-${rank}-${d}` });
+        }
       }
     }
   }
