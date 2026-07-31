@@ -12,33 +12,24 @@
 
 import { createDeck, shuffle, rankValue, isRed } from '../../lib/card.js';
 
-const SUIT_GROUPS = {
-  1: [['♠']],
-  2: [['♠', '♥'], ['♦', '♣']],
-  4: [['♠'], ['♥'], ['♦'], ['♣']],
+const SUIT_SETS = {
+  1: ['♠'],
+  2: ['♠', '♥'],
+  4: ['♠', '♥', '♦', '♣'],
 };
 
 const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
 export function createSpider(difficulty = 1) {
-  const suitGroups = SUIT_GROUPS[difficulty] || SUIT_GROUPS[1];
-  const suits = suitGroups.flat();
+  const suits = SUIT_SETS[difficulty] || SUIT_SETS[1];
+  // Total cards must be 104. With 13 ranks and N suits, each rank appears 104 / (N * 13) times.
+  const copiesPerRank = Math.floor(104 / (suits.length * RANKS.length));
   const cards = [];
 
-  if (difficulty === 1) {
-    // 1 suit: 8 copies of each rank (104 cards total, all same suit)
-    for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < copiesPerRank; i++) {
+    for (const suit of suits) {
       for (const rank of RANKS) {
-        cards.push({ suit: '♠', rank, value: rankValue(rank), color: 'black', faceUp: false, id: `♠-${rank}-${i}` });
-      }
-    }
-  } else {
-    // 2 or 4 suits: 2 full decks with the selected suits
-    for (let d = 0; d < 2; d++) {
-      for (const suit of suits) {
-        for (const rank of RANKS) {
-          cards.push({ suit, rank, value: rankValue(rank), color: isRed(suit) ? 'red' : 'black', faceUp: false, id: `${suit}-${rank}-${d}` });
-        }
+        cards.push({ suit, rank, value: rankValue(rank), color: isRed(suit) ? 'red' : 'black', faceUp: false, id: `${suit}-${rank}-${i}` });
       }
     }
   }
