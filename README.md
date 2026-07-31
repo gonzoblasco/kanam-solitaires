@@ -19,7 +19,7 @@ More games coming soon: Spider, FreeCell, Pyramid...
 
 ## Play
 
-👉 **[kanam-solitaires.gonzoblasco.dev](https://gonzoblasco.github.io/kanam-solitaires/)**
+👉 **[https://gonzoblasco.github.io/kanam-solitaires/](https://gonzoblasco.github.io/kanam-solitaires/)**
 
 ## Development
 
