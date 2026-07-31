@@ -2,16 +2,19 @@
  * DOM helpers for rendering cards and piles.
  */
 
+import { getSuitSVG } from './suits.js';
+
 export function createCardElement(card) {
   const el = document.createElement('div');
   el.className = `card ${card.color}${card.faceUp ? '' : ' face-down'}`;
   el.dataset.cardId = card.id;
 
   if (card.faceUp) {
+    const svg = getSuitSVG(card.suit);
     el.innerHTML = `
       <div class="card-rank">${card.rank}</div>
-      <div class="card-suit">${card.suit}</div>
-      <div class="card-center">${card.suit}</div>
+      <div class="card-suit">${svg}</div>
+      <div class="card-center">${svg}</div>
     `;
   }
 
@@ -22,10 +25,11 @@ export function updateCardElement(el, card) {
   el.className = `card ${card.color}${card.faceUp ? '' : ' face-down'}`;
 
   if (card.faceUp) {
+    const svg = getSuitSVG(card.suit);
     el.innerHTML = `
       <div class="card-rank">${card.rank}</div>
-      <div class="card-suit">${card.suit}</div>
-      <div class="card-center">${card.suit}</div>
+      <div class="card-suit">${svg}</div>
+      <div class="card-center">${svg}</div>
     `;
   } else {
     el.innerHTML = '';

@@ -131,7 +131,9 @@ body {
     linear-gradient(145deg, #fff8ee, var(--color-card-bg));
   border: 1px solid var(--color-card-border);
   box-shadow:
-    0 1px 3px var(--color-card-shadow),
+    0 1px 2px rgba(0,0,0,0.15),
+    0 2px 4px rgba(0,0,0,0.1),
+    0 4px 8px rgba(0,0,0,0.05),
     inset 0 1px 0 rgba(255,255,255,0.6);
   position: absolute;
   cursor: pointer;
@@ -145,6 +147,11 @@ body {
 
 .card:hover {
   background: var(--color-card-bg-hover);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.2),
+    0 4px 8px rgba(0,0,0,0.15),
+    0 8px 16px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.6);
 }
 
 .card:active {
@@ -160,9 +167,14 @@ body {
 }
 
 .card-suit {
-  font-size: 0.65rem;
   line-height: 1;
   margin-top: 1px;
+}
+
+.card-suit svg {
+  width: 10px;
+  height: 10px;
+  display: block;
 }
 
 .card-center {
@@ -170,25 +182,30 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  line-height: 1;
-  text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+.card-center svg {
+  width: 28px;
+  height: 28px;
+  display: block;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
 }
 
 /* ─── Face Down (dorso) ─── */
 .card.face-down {
   background:
-    radial-gradient(circle at 40% 35%, rgba(255,255,255,0.08) 0%, transparent 50%),
-    repeating-linear-gradient(
-      45deg,
-      #1a5276,
-      #1a5276 3px,
-      #1f618d 3px,
-      #1f618d 6px
+    radial-gradient(circle at 40% 35%, rgba(255,255,255,0.06) 0%, transparent 50%),
+    conic-gradient(
+      from 45deg at 50% 50%,
+      #1a5276 0deg 90deg,
+      #1f618d 90deg 180deg,
+      #1a5276 180deg 270deg,
+      #1f618d 270deg 360deg
     );
   border-color: #154360;
   box-shadow:
-    0 1px 3px var(--color-card-shadow),
+    0 1px 2px rgba(0,0,0,0.15),
+    0 2px 4px rgba(0,0,0,0.1),
     inset 0 0 0 1px rgba(255,255,255,0.05);
   cursor: default;
   display: flex;
@@ -199,7 +216,7 @@ body {
 .card.face-down::after {
   content: '♠';
   font-size: 1.4rem;
-  color: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.06);
   text-shadow: none;
 }
 
