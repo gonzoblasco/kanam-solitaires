@@ -3,11 +3,24 @@
  */
 
 import { initKlondike } from './games/klondike/index.js';
+import { isSoundEnabled, setSoundEnabled } from './lib/sound.js';
 
 const container = document.getElementById('game-container');
 let currentDrawMode = 1;
 let currentScoringMode = 'standard';
 let currentGame = initKlondike(container, currentDrawMode, currentScoringMode);
+
+// Sound toggle
+const soundToggle = document.getElementById('sound-toggle');
+function updateSoundToggle() {
+  soundToggle.textContent = isSoundEnabled() ? '🔊' : '🔇';
+}
+updateSoundToggle();
+
+soundToggle.addEventListener('click', () => {
+  setSoundEnabled(!isSoundEnabled());
+  updateSoundToggle();
+});
 
 // Draw mode selector
 document.querySelectorAll('.draw-mode-btn').forEach((btn) => {

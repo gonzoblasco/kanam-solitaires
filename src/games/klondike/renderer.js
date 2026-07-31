@@ -6,6 +6,15 @@ import { createCardElement } from '../../lib/dom.js';
 import { showModal } from '../../lib/modal.js';
 import { getStats, recordGame, resetStats, getAllStats } from '../../lib/stats.js';
 import {
+  isSoundEnabled,
+  setSoundEnabled,
+  playClick,
+  playSlide,
+  playFlip,
+  playFoundation,
+  playVictory,
+} from '../../lib/sound.js';
+import {
   createKlondike,
   drawStock,
   wasteToFoundation,
@@ -193,6 +202,7 @@ export function renderKlondike(container, state, isNew = false) {
 
     // Confetti!
     spawnConfetti();
+    playVictory();
   }
 }
 
@@ -211,6 +221,7 @@ function createStockElement(state) {
     empty.textContent = '↻';
     empty.addEventListener('click', () => {
       drawStock(state);
+      playClick();
       rerender(state);
     });
     el.appendChild(empty);
@@ -219,6 +230,7 @@ function createStockElement(state) {
     const cardEl = createCardElement(card);
     cardEl.addEventListener('click', () => {
       drawStock(state);
+      playClick();
       rerender(state);
     });
     el.appendChild(cardEl);
@@ -306,12 +318,14 @@ function createFoundationElement(state, index) {
     e.preventDefault();
     el.classList.remove('drag-over');
     const data = e.dataTransfer.getData('text/plain');
+    let moved = false;
     if (data === 'waste-top') {
-      wasteToFoundation(state, index);
+      moved = wasteToFoundation(state, index);
     } else if (data.startsWith('tableau-')) {
       const colIdx = parseInt(data.split('-')[1], 10);
-      tableauToFoundation(state, colIdx, index);
+      moved = tableauToFoundation(state, colIdx, index);
     }
+    if (moved) playFoundation();
     rerender(state);
   });
 
@@ -391,21 +405,23 @@ function createColumnElement(state, colIndex, isNew) {
     e.preventDefault();
     pileEl.classList.remove('drag-over');
     const data = e.dataTransfer.getData('text/plain');
+    let moved = false;
 
     if (data === 'waste-top') {
-      wasteToTableau(state, colIndex);
+      moved = wasteToTableau(state, colIndex);
     } else if (data.startsWith('tableau-')) {
       const parts = data.split('-');
       const srcCol = parseInt(parts[1], 10);
       const cardIdx = parseInt(parts[2], 10);
       if (srcCol !== colIndex) {
-        moveTableauRun(state, srcCol, cardIdx, colIndex);
+        moved = moveTableauRun(state, srcCol, cardIdx, colIndex);
       }
     } else if (data.startsWith('foundation-')) {
       const fIdx = parseInt(data.split('-')[1], 10);
-      foundationToTableau(state, fIdx, colIndex);
+      moved = foundationToTableau(state, fIdx, colIndex);
     }
 
+    if (moved) playSlide();
     rerender(state);
   });
 
