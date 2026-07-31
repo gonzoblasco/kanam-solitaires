@@ -959,14 +959,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Slight vertical overlap to fit viewport */
-  gap: calc(var(--pyramid-card-height) * -0.32);
+  gap: 0;
 }
 
 .pyramid-row {
   display: flex;
   gap: clamp(2px, 0.6vw, 4px);
   position: relative;
+  margin-bottom: calc(var(--pyramid-card-height) * -0.45);
+}
+
+.pyramid-row:last-child {
+  margin-bottom: 0;
 }
 
 .pyramid-row .card {
