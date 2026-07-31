@@ -4,6 +4,7 @@
 
 import { createCardElement } from '../../lib/dom.js';
 import { showModal } from '../../lib/modal.js';
+import { getStats, recordGame, resetStats, getAllStats } from '../../lib/stats.js';
 import {
   createKlondike,
   drawStock,
@@ -137,6 +138,12 @@ export function renderKlondike(container, state) {
   });
   bottomBar.appendChild(autoBtn);
 
+  const statsBtn = document.createElement('button');
+  statsBtn.className = 'action-btn';
+  statsBtn.textContent = '📊 Stats';
+  statsBtn.addEventListener('click', () => showStatsPanel(state));
+  bottomBar.appendChild(statsBtn);
+
   const newGameBtn = document.createElement('button');
   newGameBtn.className = 'action-btn new-game-btn';
   newGameBtn.textContent = '♠ New Game';
@@ -166,9 +173,22 @@ export function renderKlondike(container, state) {
   if (isGameWon(state)) {
     stopTimer(state);
     stopTimerDisplay();
+
+    // Record stats
+    const modeKey = `draw${state.drawMode}-${state.scoringMode}`;
+    recordGame('klondike', modeKey, true, state.elapsed, state.score, state.moves);
+    const stats = getStats('klondike', modeKey);
+
     const winBanner = document.createElement('div');
     winBanner.className = 'win-banner';
-    winBanner.innerHTML = '🎉 You Win! 🎉<br><small>Time: ' + formatTime(state.elapsed) + ' · Score: ' + state.score + ' · Moves: ' + state.moves + '</small>';
+    winBanner.innerHTML = `
+      🎉 You Win! 🎉
+      <small>
+        Time: ${formatTime(state.elapsed)} · Score: ${state.score} · Moves: ${state.moves}
+        <br>
+        Best: ${formatTime(stats.bestTime || 0)} / ${stats.bestScore || 0} pts (${stats.won}/${stats.played} won)
+      </small>
+    `;
     container.appendChild(winBanner);
   }
 }
@@ -418,4 +438,69 @@ function showHint(hint) {
 
   // Auto-clear hint after 3 seconds
   setTimeout(clearHint, 3000);
+}
+
+/* ─── Stats Panel ─── */
+
+function showStatsPanel(state) {
+  const allStats = getAllStats('klondike');
+  const modeKey = `draw${state.drawMode}-${state.scoringMode}`;
+  const currentStats = getStats('klondike', modeKey);
+
+  let html = '<div class="stats-content">';
+
+  if (Object.keys(allStats).length === 0) {
+    html += '<p class="stats-empty">No games played yet.</p>';
+  } else {
+    html += '<table class="stats-table">';
+    html += '<tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
+    for (const [mode, s] of Object.entries(allStats)) {
+      const isCurrent = mode === modeKey;
+      html += `<tr class="${isCurrent ? 'stats-current' : ''}">`;
+      html += `<td>${mode}</td>`;
+      html += `<td>${s.played}</td>`;
+      html += `<td>${s.won}</td>`;
+      html += `<td>${s.bestTime ? formatTime(s.bestTime) : '—'}</td>`;
+      html += `<td>${s.bestScore ?? '—'}</td>`;
+      html += '</tr>';
+    }
+    html += '</table>';
+  }
+
+  html += `
+    <div class="stats-actions">
+      <button class="action-btn" id="stats-reset-btn">🗑 Reset All</button>
+      <button class="action-btn" id="stats-close-btn">Close</button>
+    </div>
+  `;
+  html += '</div>';
+
+  showModal({
+    title: '📊 Statistics',
+    message: html,
+    confirmText: 'Close',
+    cancelText: null,
+  }).then(() => {
+    // Modal closed
+  });
+
+  // Use setTimeout to attach events after modal renders
+  setTimeout(() => {
+    const resetBtn = document.getElementById('stats-reset-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', () => {
+        showModal({
+          title: 'Reset Stats',
+          message: 'Are you sure you want to reset all statistics?',
+          confirmText: 'Reset',
+          cancelText: 'Cancel',
+        }).then((confirmed) => {
+          if (confirmed) {
+            resetStats('klondike');
+            showStatsPanel(state); // Refresh
+          }
+        });
+      });
+    }
+  }, 50);
 }
