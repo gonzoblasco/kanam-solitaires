@@ -152,13 +152,11 @@ export function moveRun(state, sourceCol, cardIndex, targetCol) {
   const runStart = getRunStart(state.tableau[sourceCol], cardIndex);
   if (runStart === -1) return false;
 
-  const cards = state.tableau[sourceCol].splice(runStart);
-  if (!canMoveToColumn(cards[0], state.tableau[targetCol])) {
-    state.tableau[sourceCol].push(...cards);
-    return false;
-  }
+  const cards = state.tableau[sourceCol].slice(runStart);
+  if (!canMoveToColumn(cards[0], state.tableau[targetCol])) return false;
 
   pushUndo(state);
+  state.tableau[sourceCol].splice(runStart);
   state.tableau[targetCol].push(...cards);
 
   // Flip new top card
@@ -295,8 +293,9 @@ export function autoComplete(state) {
       const column = state.tableau[hint.sourceCol];
       const runStart = getRunStart(column, hint.cardIndex);
       if (runStart !== -1) {
-        const cards = column.splice(runStart);
+        const cards = column.slice(runStart);
         pushUndo(state);
+        column.splice(runStart);
         state.tableau[hint.destCol].push(...cards);
         state.moves++;
         checkAllColumns(state);
