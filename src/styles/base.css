@@ -917,6 +917,81 @@ body {
   min-width: 0;
 }
 
+/* ─── Pyramid Layout ─── */
+.pyramid-tableau {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 600px;
+  position: relative;
+  z-index: 1;
+  align-items: center;
+}
+
+.pyramid-top {
+  display: flex;
+  gap: var(--card-gap);
+  align-self: flex-start;
+}
+
+.pyramid-stock,
+.pyramid-waste {
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  position: relative;
+}
+
+.pyramid-stock .card {
+  cursor: pointer;
+}
+
+.pyramid-stock .card:active {
+  transform: scale(0.95);
+}
+
+.pyramid-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pyramid-row {
+  display: flex;
+  gap: 4px;
+}
+
+.pyramid-row .card {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.pyramid-row .card:hover {
+  transform: translateY(-2px);
+}
+
+.pyramid-row .card.selected {
+  box-shadow: 0 0 0 3px var(--color-gold), 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.pyramid-row .card.card-removed {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pyramid-remove-btn {
+  align-self: center;
+  margin: 8px 0;
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.pyramid-remove-btn:hover {
+  background: rgba(212, 160, 23, 0.15);
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   :root {
