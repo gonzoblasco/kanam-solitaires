@@ -190,10 +190,19 @@ export function moveRun(state, sourceCol, cardIndex, targetCol) {
   state.moves++;
   startTimer(state);
 
-  // Check for completed run (K→A of same suit)
-  checkCompleteRun(state, targetCol);
+  // Check all columns for completed runs
+  checkAllColumns(state);
 
   return true;
+}
+
+/**
+ * Check all columns for completed runs.
+ */
+function checkAllColumns(state) {
+  for (let i = 0; i < 10; i++) {
+    checkCompleteRun(state, i);
+  }
 }
 
 /**
@@ -252,6 +261,10 @@ export function drawStock(state) {
 
   state.moves++;
   startTimer(state);
+
+  // Check all columns for completed runs after draw
+  checkAllColumns(state);
+
   return true;
 }
 
