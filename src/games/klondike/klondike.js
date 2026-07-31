@@ -195,6 +195,43 @@ export function tableauToFoundation(state, colIndex, foundationIndex) {
 }
 
 /**
+ * Auto-move: find the best destination for a card (or run) on double-click.
+ * Priority:
+ *   1. Foundation (if the card can go there)
+ *   2. Tableau column (if the card can be placed)
+ * Returns { type: 'foundation'|'tableau', index } or null if no valid move.
+ */
+export function findAutoDestination(state, card, sourceType, sourceIndex, cardIndex) {
+  // 1. Try foundations first (only for single cards, not runs)
+  if (sourceType === 'waste' || (sourceType === 'tableau' && cardIndex === state.tableau[sourceIndex].length - 1)) {
+    for (let i = 0; i < 4; i++) {
+      if (canMoveToFoundation(card, state.foundations[i])) {
+        return { type: 'foundation', index: i };
+      }
+    }
+  }
+
+  // 2. Try tableau columns (for runs or cards that didn't fit a foundation)
+  for (let i = 0; i < 7; i++) {
+    if (sourceType === 'tableau' && i === sourceIndex) continue;
+    if (canMoveToTableau(card, state.tableau[i])) {
+      return { type: 'tableau', index: i };
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Execute an auto-move (double-click action).
+ */
+export function executeAutoMove(state, dest) {
+  if (!dest) return false;
+  // The move was already executed by the caller; this is a no-op helper
+  return true;
+}
+
+/**
  * Check if the game is won (all foundations complete).
  */
 export function isGameWon(state) {

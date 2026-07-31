@@ -2,13 +2,15 @@
  * Klondike renderer — builds and updates the DOM.
  */
 
-import { createCardElement, updateCardElement, clearElement } from '../../lib/dom.js';
+import { createCardElement } from '../../lib/dom.js';
 import {
   drawStock,
   wasteToFoundation,
   wasteToTableau,
   moveTableauRun,
   tableauToFoundation,
+  getTableauRunStart,
+  findAutoDestination,
   isGameWon,
 } from './klondike.js';
 
@@ -52,6 +54,18 @@ export function renderKlondike(container, state) {
   table.appendChild(columnsEl);
 
   container.appendChild(table);
+
+  // Check win condition
+  if (isGameWon(state)) {
+    const winBanner = document.createElement('div');
+    winBanner.className = 'win-banner';
+    winBanner.textContent = '🎉 You Win! 🎉';
+    container.appendChild(winBanner);
+  }
+}
+
+function rerender(state) {
+  renderKlondike(document.getElementById('game-container'), state);
 }
 
 function createStockElement(state) {
@@ -65,7 +79,7 @@ function createStockElement(state) {
     empty.textContent = '↻';
     empty.addEventListener('click', () => {
       drawStock(state);
-      renderKlondike(document.getElementById('game-container'), state);
+      rerender(state);
     });
     el.appendChild(empty);
   } else {
@@ -73,7 +87,7 @@ function createStockElement(state) {
     const cardEl = createCardElement(card);
     cardEl.addEventListener('click', () => {
       drawStock(state);
-      renderKlondike(document.getElementById('game-container'), state);
+      rerender(state);
     });
     el.appendChild(cardEl);
   }
@@ -92,6 +106,18 @@ function createWasteElement(state) {
     cardEl.draggable = true;
     cardEl.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', 'waste-top');
+    });
+    // Double-click: auto-move waste top card
+    cardEl.addEventListener('dblclick', () => {
+      const dest = findAutoDestination(state, card, 'waste', null, null);
+      if (dest) {
+        if (dest.type === 'foundation') {
+          wasteToFoundation(state, dest.index);
+        } else if (dest.type === 'tableau') {
+          wasteToTableau(state, dest.index);
+        }
+        rerender(state);
+      }
     });
     el.appendChild(cardEl);
   } else {
@@ -130,7 +156,7 @@ function createFoundationElement(state, index) {
       const colIdx = parseInt(data.split('-')[1], 10);
       tableauToFoundation(state, colIdx, index);
     }
-    renderKlondike(document.getElementById('game-container'), state);
+    rerender(state);
   });
 
   return el;
@@ -164,6 +190,26 @@ function createColumnElement(state, colIndex) {
         cardEl.addEventListener('dragstart', (e) => {
           e.dataTransfer.setData('text/plain', `tableau-${colIndex}-${cardIndex}`);
         });
+
+        // Double-click: auto-move the run starting at this card
+        cardEl.addEventListener('dblclick', () => {
+          const runStart = getTableauRunStart(state.tableau[colIndex], cardIndex);
+          if (runStart === -1) return;
+
+          const runCard = state.tableau[colIndex][runStart];
+          const dest = findAutoDestination(state, runCard, 'tableau', colIndex, cardIndex);
+          if (dest) {
+            if (dest.type === 'foundation') {
+              // Only the last card can go to foundation
+              if (cardIndex === column.length - 1) {
+                tableauToFoundation(state, colIndex, dest.index);
+              }
+            } else if (dest.type === 'tableau') {
+              moveTableauRun(state, colIndex, runStart, dest.index);
+            }
+            rerender(state);
+          }
+        });
       }
 
       pileEl.appendChild(cardEl);
@@ -191,7 +237,7 @@ function createColumnElement(state, colIndex) {
       }
     }
 
-    renderKlondike(document.getElementById('game-container'), state);
+    rerender(state);
   });
 
   el.appendChild(pileEl);
