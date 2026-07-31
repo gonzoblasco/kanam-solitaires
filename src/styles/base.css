@@ -1,0 +1,287 @@
+/* ─── Reset & Variables ─── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-bg: #1a3a2a;
+  --color-bg-light: #2d5a3f;
+  --color-felt: #0f6b3a;
+  --color-text: #e8e0d0;
+  --color-text-muted: #a09880;
+  --color-card-bg: #f5f0e8;
+  --color-card-border: #c0b8a8;
+  --color-red: #c0392b;
+  --color-black: #1a1a2e;
+  --color-gold: #d4a017;
+  --color-highlight: rgba(255, 255, 200, 0.3);
+  --color-selected: rgba(255, 200, 50, 0.4);
+  --color-valid-drop: rgba(100, 255, 100, 0.25);
+
+  --card-width: 80px;
+  --card-height: 112px;
+  --card-radius: 6px;
+  --card-gap: 8px;
+  --stack-overlap: 24px;
+
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* ─── Header ─── */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--color-bg-light);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.app-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.game-nav {
+  display: flex;
+  gap: 4px;
+}
+
+.game-btn {
+  padding: 6px 14px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.game-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+  color: var(--color-text);
+}
+
+.game-btn.active {
+  background: var(--color-felt);
+  color: var(--color-text);
+  border-color: var(--color-gold);
+}
+
+.game-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ─── Game Container ─── */
+#game-container {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 16px;
+  overflow: auto;
+}
+
+/* ─── Cards ─── */
+.card {
+  width: var(--card-width);
+  height: var(--card-height);
+  border-radius: var(--card-radius);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  position: absolute;
+  cursor: pointer;
+  user-select: none;
+  transition: box-shadow 0.15s, transform 0.1s;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 6px;
+  font-size: 0.8rem;
+}
+
+.card.face-down {
+  background: repeating-linear-gradient(
+    45deg,
+    #1a5276,
+    #1a5276 4px,
+    #1f618d 4px,
+    #1f618d 8px
+  );
+  border-color: #154360;
+  cursor: default;
+}
+
+.card.face-down .card-rank,
+.card.face-down .card-suit,
+.card.face-down .card-center {
+  display: none;
+}
+
+.card.red {
+  color: var(--color-red);
+}
+
+.card.black {
+  color: var(--color-black);
+}
+
+.card.selected {
+  box-shadow: 0 0 0 3px var(--color-selected), 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.card.valid-drop {
+  box-shadow: 0 0 0 3px var(--color-valid-drop);
+}
+
+.card-rank {
+  font-weight: 700;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.card-suit {
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.card-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+/* ─── Piles ─── */
+.pile {
+  position: relative;
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+}
+
+.pile-target {
+  border: 2px dashed rgba(255,255,255,0.2);
+  border-radius: var(--card-radius);
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+}
+
+/* ─── Klondike Layout ─── */
+.klondike-tableau {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 700px;
+}
+
+.klondike-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.klondike-stock-area {
+  display: flex;
+  gap: var(--card-gap);
+}
+
+.klondike-foundations {
+  display: flex;
+  gap: var(--card-gap);
+}
+
+.klondike-columns {
+  display: flex;
+  gap: var(--card-gap);
+  justify-content: space-between;
+}
+
+.klondike-column {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── Stock pile ─── */
+.stock-pile {
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  position: relative;
+}
+
+.stock-pile .card {
+  cursor: pointer;
+}
+
+.stock-empty {
+  width: var(--card-width);
+  height: var(--card-height);
+  border: 2px dashed rgba(255,255,255,0.15);
+  border-radius: var(--card-radius);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: rgba(255,255,255,0.2);
+}
+
+/* ─── Waste pile ─── */
+.waste-pile {
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  position: relative;
+}
+
+/* ─── Foundation ─── */
+.foundation {
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  position: relative;
+}
+
+.foundation .pile-target {
+  width: var(--card-width);
+  height: var(--card-height);
+}
+
+/* ─── Column pile ─── */
+.column-pile {
+  position: relative;
+  min-height: var(--card-height);
+}
+
+.column-pile .card {
+  position: absolute;
+}
+
+/* ─── Utility ─── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
