@@ -14,7 +14,7 @@
 
 import { createDeck, shuffle, rankValue, isRed } from '../../lib/card.js';
 
-export function createKlondike(drawMode = 1) {
+export function createKlondike(drawMode = 1, scoringMode = 'standard') {
   const deck = shuffle(createDeck());
 
   // Deal tableau columns (1-7 cards, only top card face up)
@@ -35,15 +35,18 @@ export function createKlondike(drawMode = 1) {
   const waste = [];
   const foundations = [[], [], [], []];
 
+  const initialScore = scoringMode === 'vegas' ? -52 : 0;
+
   return {
     stock,
     waste,
     foundations,
     tableau,
-    score: 0,
+    score: initialScore,
     moves: 0,
     history: [],
     drawMode,
+    scoringMode,
     startTime: null,
     elapsed: 0,
     timerRunning: false,
@@ -208,7 +211,7 @@ export function wasteToFoundation(state, foundationIndex) {
   if (!canMoveToFoundation(card, state.foundations[foundationIndex])) return false;
   pushUndo(state);
   state.foundations[foundationIndex].push(state.waste.pop());
-  state.score += 10;
+  state.score += state.scoringMode === 'vegas' ? 5 : 10;
   state.moves++;
   startTimer(state);
   return true;
@@ -272,7 +275,7 @@ export function moveTableauRun(state, sourceCol, cardIndex, targetCol) {
     const newTop = state.tableau[sourceCol][state.tableau[sourceCol].length - 1];
     if (!newTop.faceUp) {
       newTop.faceUp = true;
-      state.score += 5;
+      if (state.scoringMode === 'standard') state.score += 5;
     }
   }
 
@@ -299,11 +302,11 @@ export function tableauToFoundation(state, colIndex, foundationIndex) {
     const newTop = column[column.length - 1];
     if (!newTop.faceUp) {
       newTop.faceUp = true;
-      state.score += 5;
+      if (state.scoringMode === 'standard') state.score += 5;
     }
   }
 
-  state.score += 10;
+  state.score += state.scoringMode === 'vegas' ? 5 : 10;
   state.moves++;
   startTimer(state);
   return true;
@@ -441,7 +444,7 @@ export function autoComplete(state) {
         if (canMoveToFoundation(card, state.foundations[i])) {
           pushUndo(state);
           state.foundations[i].push(state.waste.pop());
-          state.score += 10;
+          state.score += state.scoringMode === 'vegas' ? 5 : 10;
           state.moves++;
           moved++;
           found = true;
@@ -463,7 +466,7 @@ export function autoComplete(state) {
         if (canMoveToFoundation(card, state.foundations[i])) {
           pushUndo(state);
           state.foundations[i].push(column.pop());
-          state.score += 10;
+          state.score += state.scoringMode === 'vegas' ? 5 : 10;
           state.moves++;
           moved++;
           found = true;
@@ -473,7 +476,7 @@ export function autoComplete(state) {
             const newTop = column[column.length - 1];
             if (!newTop.faceUp) {
               newTop.faceUp = true;
-              state.score += 5;
+              if (state.scoringMode === 'standard') state.score += 5;
             }
           }
           break;

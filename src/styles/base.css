@@ -402,8 +402,14 @@ body {
   gap: 12px;
 }
 
-/* ─── Draw Mode Selector ─── */
-.draw-mode-group {
+/* ─── Draw Mode & Scoring Mode Selectors ─── */
+.mode-selectors {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mode-group {
   display: flex;
   align-items: center;
   gap: 2px;
@@ -412,31 +418,31 @@ body {
   padding: 2px;
 }
 
-.draw-mode-label {
-  font-size: 0.7rem;
+.mode-label {
+  font-size: 0.65rem;
   color: var(--color-text-muted);
-  padding: 0 6px;
+  padding: 0 5px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.draw-mode-btn {
-  padding: 3px 10px;
+.mode-btn {
+  padding: 3px 8px;
   border: none;
   border-radius: 4px;
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
 }
 
-.draw-mode-btn:hover {
+.mode-btn:hover {
   color: var(--color-text);
 }
 
-.draw-mode-btn.active {
+.mode-btn.active {
   background: var(--color-felt);
   color: var(--color-text);
 }

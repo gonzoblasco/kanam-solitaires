@@ -6,7 +6,8 @@ import { initKlondike } from './games/klondike/index.js';
 
 const container = document.getElementById('game-container');
 let currentDrawMode = 1;
-let currentGame = initKlondike(container, currentDrawMode);
+let currentScoringMode = 'standard';
+let currentGame = initKlondike(container, currentDrawMode, currentScoringMode);
 
 // Draw mode selector
 document.querySelectorAll('.draw-mode-btn').forEach((btn) => {
@@ -14,7 +15,17 @@ document.querySelectorAll('.draw-mode-btn').forEach((btn) => {
     document.querySelectorAll('.draw-mode-btn').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
     currentDrawMode = parseInt(btn.dataset.draw, 10);
-    currentGame = initKlondike(container, currentDrawMode);
+    currentGame = initKlondike(container, currentDrawMode, currentScoringMode);
+  });
+});
+
+// Scoring mode selector
+document.querySelectorAll('.scoring-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.scoring-btn').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentScoringMode = btn.dataset.scoring;
+    currentGame = initKlondike(container, currentDrawMode, currentScoringMode);
   });
 });
 
@@ -27,7 +38,7 @@ document.querySelectorAll('.game-btn[data-game]').forEach((btn) => {
     const game = btn.dataset.game;
     switch (game) {
       case 'klondike':
-        currentGame = initKlondike(container, currentDrawMode);
+        currentGame = initKlondike(container, currentDrawMode, currentScoringMode);
         break;
       // Future games will go here
     }

@@ -19,10 +19,17 @@
           <button class="game-btn disabled" disabled title="Coming soon">FreeCell</button>
           <button class="game-btn disabled" disabled title="Coming soon">Pyramid</button>
         </nav>
-        <div class="draw-mode-group">
-          <span class="draw-mode-label">Draw</span>
-          <button class="draw-mode-btn active" data-draw="1">1</button>
-          <button class="draw-mode-btn" data-draw="3">3</button>
+        <div class="mode-selectors">
+          <div class="mode-group">
+            <span class="mode-label">Draw</span>
+            <button class="mode-btn draw-mode-btn active" data-draw="1">1</button>
+            <button class="mode-btn draw-mode-btn" data-draw="3">3</button>
+          </div>
+          <div class="mode-group">
+            <span class="mode-label">Score</span>
+            <button class="mode-btn scoring-btn active" data-scoring="standard">Std</button>
+            <button class="mode-btn scoring-btn" data-scoring="vegas">Vegas</button>
+          </div>
         </div>
       </div>
     </header>

@@ -53,9 +53,10 @@ export function renderKlondike(container, state) {
   // Score bar
   const scoreBar = document.createElement('div');
   scoreBar.className = 'score-bar';
+  const scoringLabel = state.scoringMode === 'vegas' ? 'Vegas' : 'Score';
   scoreBar.innerHTML = `
     <span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span>
-    <span>Score: <span class="score-value">${state.score}</span></span>
+    <span>${scoringLabel}: <span class="score-value">${state.score}</span></span>
     <span>Moves: <span class="moves-value">${state.moves}</span></span>
   `;
   table.appendChild(scoreBar);
