@@ -341,6 +341,10 @@ function createColumnElement(state, colIndex) {
       cardEl.style.top = `${cardIndex * 24}px`;
       cardEl.style.zIndex = cardIndex;
 
+      // Deal animation
+      cardEl.classList.add('dealing');
+      cardEl.style.animationDelay = `${(colIndex * 0.08 + cardIndex * 0.04)}s`;
+
       if (card.faceUp) {
         cardEl.draggable = true;
         cardEl.addEventListener('dragstart', (e) => {
