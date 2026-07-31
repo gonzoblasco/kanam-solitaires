@@ -27,6 +27,8 @@
 
   --card-width: clamp(48px, 11vw, 80px);
   --card-height: calc(var(--card-width) * 1.4);
+  --pyramid-card-width: clamp(42px, 9vw, 64px);
+  --pyramid-card-height: calc(var(--pyramid-card-width) * 1.4);
   --card-radius: clamp(4px, 1.2vw, 7px);
   --card-gap: clamp(4px, 1.2vw, 8px);
   --stack-overlap: clamp(16px, 3vw, 24px);
@@ -134,7 +136,7 @@ body {
   align-items: flex-start;
   justify-content: center;
   padding: 12px;
-  overflow: visible;
+  overflow: auto;
   position: relative;
   transition: opacity 0.2s;
   /* Custom scrollbar */
@@ -939,13 +941,12 @@ body {
   flex-direction: column;
   gap: clamp(2px, 0.8vw, 6px);
   width: 100%;
-  max-width: min(calc(var(--card-width) * 8), 520px);
+  max-width: calc(var(--pyramid-card-width) * 7 + var(--card-gap) * 6 + var(--side-bar-width) + 40px);
   position: relative;
   z-index: 1;
   align-items: center;
   padding-right: calc(var(--side-bar-width) + 12px);
   max-height: calc(100vh - 130px);
-  overflow-y: auto;
 }
 
 .pyramid-top {
@@ -959,8 +960,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  /* Overlap rows to save vertical space */
-  gap: calc(var(--card-height) * -0.55);
+  gap: clamp(2px, 0.6vw, 4px);
 }
 
 .pyramid-row {
@@ -974,13 +974,13 @@ body {
   position: relative;
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
-  width: var(--card-width);
-  height: var(--card-height);
+  width: var(--pyramid-card-width, var(--card-width));
+  height: var(--pyramid-card-height, var(--card-height));
   z-index: 1;
 }
 
 .pyramid-row .card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-2px);
   z-index: 10;
 }
 
