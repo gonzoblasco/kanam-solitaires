@@ -205,11 +205,13 @@ function checkAllColumns(state) {
   }
 }
 
+export { checkAllColumns };
+
 /**
  * Check if the last 13 cards of a column form a complete K→A run of the same suit.
  * If so, remove them.
  */
-function checkCompleteRun(state, colIndex) {
+export function checkCompleteRun(state, colIndex) {
   const column = state.tableau[colIndex];
   if (column.length < 13) return false;
 
