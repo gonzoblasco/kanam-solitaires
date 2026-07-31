@@ -55,7 +55,34 @@
 - [ ] Verificar que `__spiderState__`, `__freecellState__` se remuevan del build final
 - [ ] Revisar que los `id` de cartas no se repitan (FreeCell usaba nombres de palo + rango, únicos por mazo; Spider usa índices de copia)
 
-### 6.1 Personalización de reglas por juego
+### 6.1 Responsive + botonera vertical (highest UI priority)
+- [ ] Rehacer botonera inferior como columna vertical flotante/derecha sin ocupar ancho del tablero
+- [ ] Ancho mínimo por columna de carta que no se solape en pantallas medianas
+- [ ] Escala proporcional de cartas según viewport (CSS clamp / scale)
+- [ ] Layout que funcione en ventanas no maximizadas (ej. 900px, 700px)
+- [ ] Tap targets mínimos 44×44 en móvil
+- [ ] Evitar solapamiento de columnas en Spider (10 cols) y FreeCell (8 cols)
+
+### 6.2 Personalización de reglas por juego
+**Objetivo:** permitir al usuario elegir variantes desde el header de opciones.
+
+- [ ] **Klondike:**
+  - Relaxed mode (cualquier rey en columna vacía vs solo K)
+  - Strict mode (no foundation→tableau)
+  - Draw 1 / Draw 3
+  - Standard / Vegas scoring
+- [ ] **Spider:**
+  - 1 / 2 / 4 suits
+  - Mostrar contador de runs completadas (0/8)
+  - Opción: permitir mover runs solo si son mismo palo (más estricta)
+- [ ] **FreeCell:**
+  - Classic (alternar colores)
+  - Baker's Game (mismo palo en tableau)
+  - Supermove fórmula real: `(freeCells + 1) * 2^emptyColumns`
+- [ ] **Pyramid:**
+  - Classic (solo expuestas)
+  - Relaxed (cualquier carta visible)
+  - Scoring por tiempo restante
 **Objetivo:** permitir al usuario elegir variantes desde el header de opciones.
 
 - [ ] **Klondike:**

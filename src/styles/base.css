@@ -25,11 +25,12 @@
   --color-selected: rgba(255, 200, 50, 0.4);
   --color-valid-drop: rgba(100, 255, 100, 0.25);
 
-  --card-width: 80px;
-  --card-height: 112px;
-  --card-radius: 7px;
-  --card-gap: 8px;
-  --stack-overlap: 24px;
+  --card-width: clamp(48px, 11vw, 80px);
+  --card-height: calc(var(--card-width) * 1.4);
+  --card-radius: clamp(4px, 1.2vw, 7px);
+  --card-gap: clamp(4px, 1.2vw, 8px);
+  --stack-overlap: clamp(16px, 3vw, 24px);
+  --side-bar-width: clamp(44px, 10vw, 64px);
 
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   color: var(--color-text);
@@ -37,14 +38,15 @@
 }
 
 html, body {
-  height: 100%;
-  overflow: hidden;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 #app {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 /* ─── Felt Background ─── */
@@ -131,8 +133,8 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 16px;
-  overflow: auto;
+  padding: 12px;
+  overflow: visible;
   position: relative;
   transition: opacity 0.2s;
   /* Custom scrollbar */
@@ -394,9 +396,10 @@ body {
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  max-width: 720px;
+  max-width: calc(var(--card-width) * 7 + var(--card-gap) * 6 + 32px);
   position: relative;
   z-index: 1;
+  padding-right: calc(var(--side-bar-width) + 16px);
 }
 
 .klondike-top {
@@ -418,12 +421,12 @@ body {
 .klondike-columns {
   display: flex;
   gap: var(--card-gap);
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 
 .klondike-column {
-  flex: 1;
-  min-width: 0;
+  width: var(--card-width);
+  flex: 0 0 auto;
 }
 
 /* ─── Stock pile ─── */
@@ -571,24 +574,35 @@ body {
   color: var(--color-text);
 }
 
-/* ─── Bottom Bar ─── */
+/* ─── Bottom Bar (vertical sidebar on desktop) ─── */
 .bottom-bar {
+  position: fixed;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
-  gap: 8px;
-  justify-content: center;
-  padding: 8px 0 4px;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
 }
 
 .action-btn {
-  padding: 6px 14px;
+  width: var(--side-bar-width);
+  height: var(--side-bar-width);
+  padding: 0;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 6px;
   background: rgba(0,0,0,0.2);
   backdrop-filter: blur(4px);
   color: var(--color-text);
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.1;
 }
 
 .action-btn:hover:not(:disabled) {
@@ -823,9 +837,10 @@ body {
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  max-width: 900px;
+  max-width: calc(var(--card-width) * 10 + var(--card-gap) * 9 + 32px);
   position: relative;
   z-index: 1;
+  padding-right: calc(var(--side-bar-width) + 16px);
 }
 
 .spider-top {
@@ -859,13 +874,13 @@ body {
 
 .spider-columns {
   display: flex;
-  gap: 4px;
-  justify-content: space-between;
+  gap: var(--card-gap);
+  justify-content: flex-start;
 }
 
 .spider-column {
-  flex: 1;
-  min-width: 0;
+  width: var(--card-width);
+  flex: 0 0 auto;
 }
 
 /* ─── FreeCell Layout ─── */
@@ -874,9 +889,10 @@ body {
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  max-width: 900px;
+  max-width: calc(var(--card-width) * 8 + var(--card-gap) * 7 + 32px);
   position: relative;
   z-index: 1;
+  padding-right: calc(var(--side-bar-width) + 16px);
 }
 
 .freecell-top {
@@ -908,13 +924,13 @@ body {
 
 .freecell-columns {
   display: flex;
-  gap: 4px;
-  justify-content: space-between;
+  gap: var(--card-gap);
+  justify-content: flex-start;
 }
 
 .freecell-column {
-  flex: 1;
-  min-width: 0;
+  width: var(--card-width);
+  flex: 0 0 auto;
 }
 
 /* ─── Pyramid Layout ─── */
@@ -923,10 +939,11 @@ body {
   flex-direction: column;
   gap: 8px;
   width: 100%;
-  max-width: 600px;
+  max-width: min(calc(var(--card-width) * 8), 600px);
   position: relative;
   z-index: 1;
   align-items: center;
+  padding-right: calc(var(--side-bar-width) + 16px);
 }
 
 .pyramid-top {
@@ -995,10 +1012,11 @@ body {
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   :root {
-    --card-width: 56px;
-    --card-height: 78px;
+    --card-width: 52px;
+    --card-height: calc(var(--card-width) * 1.4);
     --card-gap: 4px;
-    --stack-overlap: 18px;
+    --stack-overlap: 16px;
+    --side-bar-width: 52px;
   }
 
   .app-header {
@@ -1029,12 +1047,12 @@ body {
     padding: 8px;
   }
 
-  .klondike-tableau {
+  .klondike-tableau,
+  .spider-tableau,
+  .freecell-tableau,
+  .pyramid-tableau {
     max-width: 100%;
-  }
-
-  .klondike-columns {
-    gap: 4px;
+    padding-right: calc(var(--side-bar-width) + 8px);
   }
 
   .card-center {
@@ -1049,21 +1067,15 @@ body {
     font-size: 0.55rem;
   }
 
-  .column-pile .card {
-    top: 0 !important;
-  }
-
-  .column-pile .card:nth-child(n+2) {
-    margin-top: 18px;
-  }
-
   .bottom-bar {
-    flex-wrap: wrap;
+    right: 4px;
+    gap: 4px;
   }
 
   .action-btn {
-    font-size: 0.75rem;
-    padding: 4px 10px;
+    width: var(--side-bar-width);
+    height: var(--side-bar-width);
+    font-size: 0.65rem;
   }
 
   .win-banner {
