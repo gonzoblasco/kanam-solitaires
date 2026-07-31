@@ -190,6 +190,9 @@ export function renderKlondike(container, state) {
       </small>
     `;
     container.appendChild(winBanner);
+
+    // Confetti!
+    spawnConfetti();
   }
 }
 
@@ -503,4 +506,30 @@ function showStatsPanel(state) {
       });
     }
   }, 50);
+}
+
+/* ─── Confetti ─── */
+
+const CONFETTI_COLORS = ['#d4a017', '#c0392b', '#1a5276', '#27ae60', '#8e44ad', '#e67e22', '#fff'];
+
+function spawnConfetti() {
+  const container = document.createElement('div');
+  container.className = 'confetti-container';
+  document.body.appendChild(container);
+
+  for (let i = 0; i < 40; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.background = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    piece.style.width = `${6 + Math.random() * 6}px`;
+    piece.style.height = `${6 + Math.random() * 6}px`;
+    piece.style.animationDuration = `${2 + Math.random() * 2}s`;
+    piece.style.animationDelay = `${Math.random() * 1.5}s`;
+    container.appendChild(piece);
+  }
+
+  // Remove after animation
+  setTimeout(() => container.remove(), 4000);
 }
