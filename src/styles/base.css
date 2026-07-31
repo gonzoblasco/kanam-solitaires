@@ -817,6 +817,57 @@ body {
   background: rgba(255,255,255,0.1);
 }
 
+/* ─── Spider Layout ─── */
+.spider-tableau {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+  z-index: 1;
+}
+
+.spider-top {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 4px;
+}
+
+.spider-stock {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  position: relative;
+}
+
+.spider-stock .card {
+  cursor: pointer;
+  position: relative;
+}
+
+.spider-stock .card:active {
+  transform: scale(0.95);
+}
+
+.stock-count {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.spider-columns {
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+}
+
+.spider-column {
+  flex: 1;
+  min-width: 0;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   :root {
