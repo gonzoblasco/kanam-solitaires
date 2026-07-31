@@ -108,7 +108,7 @@ export function canMoveToFoundation(card, foundation) {
 export function canMoveToColumn(card, column) {
   if (column.length === 0) return true;
   const top = column[column.length - 1];
-  return rankValue(card.rank) === rankValue(top.rank) - 1;
+  return rankValue(card.rank) === rankValue(top.rank) - 1 && card.color !== top.color;
 }
 
 /**
@@ -122,7 +122,7 @@ export function getMaxMovable(state) {
 
 /**
  * Get the start of a valid run from cardIndex.
- * In FreeCell, runs don't need alternating colors, just descending ranks.
+ * In FreeCell, runs must be descending by rank and alternate colors.
  */
 export function getRunStart(column, cardIndex, maxCount) {
   if (cardIndex < 0 || cardIndex >= column.length) return -1;
@@ -130,7 +130,9 @@ export function getRunStart(column, cardIndex, maxCount) {
   if (count > maxCount) return -1;
 
   for (let i = cardIndex; i < column.length - 1; i++) {
-    if (rankValue(column[i].rank) !== rankValue(column[i + 1].rank) + 1) {
+    const a = column[i];
+    const b = column[i + 1];
+    if (rankValue(a.rank) !== rankValue(b.rank) + 1 || a.color === b.color) {
       return -1;
     }
   }
