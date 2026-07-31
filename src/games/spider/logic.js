@@ -207,15 +207,16 @@ function checkCompleteRun(state, colIndex) {
   const start = column.length - 13;
   const run = column.slice(start);
 
-  // Must be K→A of the same suit
+  // Run in array is [A (bottom), 2, 3, ..., K (top)]
+  // Must be A→K of the same suit
   const suit = run[0].suit;
-  if (run[0].rank !== 'K') return false;
+  if (run[0].rank !== 'A') return false;
   for (let i = 0; i < 12; i++) {
-    if (run[i].suit !== suit || rankValue(run[i].rank) !== rankValue(run[i + 1].rank) + 1) {
+    if (run[i].suit !== suit || rankValue(run[i].rank) !== rankValue(run[i + 1].rank) - 1) {
       return false;
     }
   }
-  if (run[12].rank !== 'A') return false;
+  if (run[12].rank !== 'K') return false;
 
   // Remove the run
   column.splice(start);
