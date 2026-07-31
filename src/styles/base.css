@@ -960,6 +960,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 0;
+  isolation: isolate;
 }
 
 .pyramid-row {
@@ -983,10 +984,12 @@ body {
 
 .pyramid-row .card:hover {
   transform: translateY(-6px);
+  z-index: 100;
 }
 
 .pyramid-row .card.selected {
   box-shadow: 0 0 0 3px var(--color-gold), 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 100;
 }
 
 .pyramid-row .card.card-removed {
