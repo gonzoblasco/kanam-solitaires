@@ -45,7 +45,7 @@ function stopTimerDisplay() {
   }
 }
 
-export function renderKlondike(container, state) {
+export function renderKlondike(container, state, isNew = false) {
   currentState = state;
   stopTimerDisplay();
   container.innerHTML = '';
@@ -197,7 +197,7 @@ export function renderKlondike(container, state) {
 }
 
 function rerender(state) {
-  renderKlondike(document.getElementById('game-container'), state);
+  renderKlondike(document.getElementById('game-container'), state, false);
 }
 
 function createStockElement(state) {
@@ -341,9 +341,11 @@ function createColumnElement(state, colIndex) {
       cardEl.style.top = `${cardIndex * 24}px`;
       cardEl.style.zIndex = cardIndex;
 
-      // Deal animation
-      cardEl.classList.add('dealing');
-      cardEl.style.animationDelay = `${(colIndex * 0.08 + cardIndex * 0.04)}s`;
+      // Deal animation (only on new game)
+      if (isNew) {
+        cardEl.classList.add('dealing');
+        cardEl.style.animationDelay = `${(colIndex * 0.08 + cardIndex * 0.04)}s`;
+      }
 
       if (card.faceUp) {
         cardEl.draggable = true;

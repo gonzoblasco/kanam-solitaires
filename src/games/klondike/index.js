@@ -7,6 +7,6 @@ import { renderKlondike } from './renderer.js';
 
 export function initKlondike(container, drawMode = 1, scoringMode = 'standard') {
   const state = createKlondike(drawMode, scoringMode);
-  renderKlondike(container, state);
+  renderKlondike(container, state, true);
   return state;
 }
