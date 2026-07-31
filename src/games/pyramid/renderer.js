@@ -47,7 +47,7 @@ export function renderPyramid(container, state, isNew = false) {
   // Score bar
   const scoreBar = document.createElement('div');
   scoreBar.className = 'score-bar';
-  scoreBar.innerHTML = `<span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span><span>Score: <span class="score-value">${state.score}</span></span><span>Moves: <span class="moves-value">${state.moves}</span></span>`;
+  scoreBar.innerHTML = `<span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span> <span>Score: <span class="score-value">${state.score}</span></span> <span>Moves: <span class="moves-value">${state.moves}</span></span>`;
   table.appendChild(scoreBar);
 
   // Stock + Waste
@@ -63,7 +63,6 @@ export function renderPyramid(container, state, isNew = false) {
   state.pyramid.forEach((row, rowIdx) => {
     const rowEl = document.createElement('div');
     rowEl.className = 'pyramid-row';
-    rowEl.style.marginLeft = `${(6 - rowIdx) * 20}px`;
     row.forEach((card, colIdx) => {
       const cardEl = createCardElement(card);
       cardEl.dataset.row = rowIdx;

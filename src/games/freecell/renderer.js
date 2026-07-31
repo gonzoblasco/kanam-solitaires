@@ -49,7 +49,7 @@ export function renderFreeCell(container, state, isNew = false) {
   // Score bar
   const scoreBar = document.createElement('div');
   scoreBar.className = 'score-bar';
-  scoreBar.innerHTML = `<span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span><span>Score: <span class="score-value">${state.score}</span></span><span>Moves: <span class="moves-value">${state.moves}</span></span>`;
+  scoreBar.innerHTML = `<span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span> <span>Score: <span class="score-value">${state.score}</span></span> <span>Moves: <span class="moves-value">${state.moves}</span></span>`;
   table.appendChild(scoreBar);
 
   // Top row: free cells + foundations

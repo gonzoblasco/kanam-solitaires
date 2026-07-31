@@ -937,19 +937,73 @@ body {
 .pyramid-tableau {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: clamp(2px, 0.8vw, 6px);
   width: 100%;
-  max-width: min(calc(var(--card-width) * 8), 600px);
+  max-width: min(calc(var(--card-width) * 8), 520px);
   position: relative;
   z-index: 1;
   align-items: center;
-  padding-right: calc(var(--side-bar-width) + 16px);
+  padding-right: calc(var(--side-bar-width) + 12px);
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
 }
 
 .pyramid-top {
   display: flex;
   gap: var(--card-gap);
   align-self: flex-start;
+  flex-shrink: 0;
+}
+
+.pyramid-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Overlap rows to save vertical space */
+  gap: calc(var(--card-height) * -0.55);
+}
+
+.pyramid-row {
+  display: flex;
+  gap: clamp(2px, 0.6vw, 4px);
+  position: relative;
+  z-index: 1;
+}
+
+.pyramid-row .card {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+  width: var(--card-width);
+  height: var(--card-height);
+  z-index: 1;
+}
+
+.pyramid-row .card:hover {
+  transform: translateY(-4px);
+  z-index: 10;
+}
+
+.pyramid-row .card.selected {
+  box-shadow: 0 0 0 3px var(--color-gold), 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 10;
+}
+
+.pyramid-row .card.card-removed {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pyramid-remove-btn {
+  align-self: center;
+  margin: 4px 0;
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+  flex-shrink: 0;
+}
+
+.pyramid-remove-btn:hover {
+  background: rgba(212, 160, 23, 0.15);
 }
 
 .pyramid-stock,
