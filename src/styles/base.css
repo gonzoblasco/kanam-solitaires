@@ -868,6 +868,55 @@ body {
   min-width: 0;
 }
 
+/* ─── FreeCell Layout ─── */
+.freecell-tableau {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 900px;
+  position: relative;
+  z-index: 1;
+}
+
+.freecell-top {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.freecell-cells {
+  display: flex;
+  gap: var(--card-gap);
+}
+
+.freecell-slot {
+  min-width: var(--card-width);
+  min-height: var(--card-height);
+  position: relative;
+}
+
+.freecell-slot .pile-target {
+  width: var(--card-width);
+  height: var(--card-height);
+}
+
+.freecell-foundations {
+  display: flex;
+  gap: var(--card-gap);
+}
+
+.freecell-columns {
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+}
+
+.freecell-column {
+  flex: 1;
+  min-width: 0;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   :root {

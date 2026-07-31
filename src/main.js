@@ -6,10 +6,12 @@ import { registerGame, getGames, startGame } from './lib/gameRegistry.js';
 import { isSoundEnabled, setSoundEnabled } from './lib/sound.js';
 import * as klondike from './games/klondike/index.js';
 import * as spider from './games/spider/index.js';
+import * as freecell from './games/freecell/index.js';
 
 // Register games
 registerGame(klondike);
 registerGame(spider);
+registerGame(freecell);
 
 const container = document.getElementById('game-container');
 const gameNav = document.getElementById('game-nav');
