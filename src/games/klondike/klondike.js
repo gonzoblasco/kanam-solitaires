@@ -14,7 +14,7 @@
 
 import { createDeck, shuffle, rankValue, isRed } from '../../lib/card.js';
 
-export function createKlondike() {
+export function createKlondike(drawMode = 1) {
   const deck = shuffle(createDeck());
 
   // Deal tableau columns (1-7 cards, only top card face up)
@@ -43,6 +43,7 @@ export function createKlondike() {
     score: 0,
     moves: 0,
     history: [],
+    drawMode,
   };
 }
 
@@ -91,14 +92,18 @@ export function undo(state) {
 /**
  * Draw from stock → waste.
  * If stock is empty, flip waste back to stock.
+ * Respects drawMode (1 or 3).
  */
 export function drawStock(state) {
   pushUndo(state);
 
   if (state.stock.length > 0) {
-    const card = state.stock.pop();
-    card.faceUp = true;
-    state.waste.push(card);
+    const count = Math.min(state.drawMode, state.stock.length);
+    for (let i = 0; i < count; i++) {
+      const card = state.stock.pop();
+      card.faceUp = true;
+      state.waste.push(card);
+    }
     state.moves++;
     return true;
   }
@@ -297,6 +302,71 @@ export function findAutoDestination(state, card, sourceType, sourceIndex, cardIn
   }
 
   return null;
+}
+
+/* ─── Auto-complete ─── */
+
+/**
+ * Try to move all possible cards to foundations.
+ * Returns the number of cards moved.
+ */
+export function autoComplete(state) {
+  let moved = 0;
+  let found = true;
+
+  while (found) {
+    found = false;
+
+    // Check waste
+    if (state.waste.length > 0) {
+      const card = state.waste[state.waste.length - 1];
+      for (let i = 0; i < 4; i++) {
+        if (canMoveToFoundation(card, state.foundations[i])) {
+          pushUndo(state);
+          state.foundations[i].push(state.waste.pop());
+          state.score += 10;
+          state.moves++;
+          moved++;
+          found = true;
+          break;
+        }
+      }
+    }
+
+    if (found) continue;
+
+    // Check tableau columns (only last card)
+    for (let col = 0; col < 7; col++) {
+      const column = state.tableau[col];
+      if (column.length === 0) continue;
+      const card = column[column.length - 1];
+      if (!card.faceUp) continue;
+
+      for (let i = 0; i < 4; i++) {
+        if (canMoveToFoundation(card, state.foundations[i])) {
+          pushUndo(state);
+          state.foundations[i].push(column.pop());
+          state.score += 10;
+          state.moves++;
+          moved++;
+          found = true;
+
+          // Flip new top card if face down
+          if (column.length > 0) {
+            const newTop = column[column.length - 1];
+            if (!newTop.faceUp) {
+              newTop.faceUp = true;
+              state.score += 5;
+            }
+          }
+          break;
+        }
+      }
+      if (found) break;
+    }
+  }
+
+  return moved;
 }
 
 /* ─── Win ─── */

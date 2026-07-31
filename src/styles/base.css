@@ -366,6 +366,90 @@ body {
   position: absolute;
 }
 
+/* ─── Header Right ─── */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ─── Draw Mode Selector ─── */
+.draw-mode-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  padding: 2px;
+}
+
+.draw-mode-label {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  padding: 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.draw-mode-btn {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.draw-mode-btn:hover {
+  color: var(--color-text);
+}
+
+.draw-mode-btn.active {
+  background: var(--color-felt);
+  color: var(--color-text);
+}
+
+/* ─── Bottom Bar ─── */
+.bottom-bar {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+
+.action-btn {
+  padding: 6px 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(4px);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.action-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.1);
+}
+
+.action-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.new-game-btn {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+.new-game-btn:hover {
+  background: rgba(212, 160, 23, 0.15);
+}
+
 /* ─── Win Banner ─── */
 .win-banner {
   position: fixed;
@@ -382,6 +466,15 @@ body {
   z-index: 1000;
   animation: winPulse 0.5s ease-in-out;
   text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.win-banner small {
+  font-size: 1rem;
+  font-weight: 400;
+  display: block;
+  margin-top: 4px;
 }
 
 @keyframes winPulse {
@@ -390,54 +483,84 @@ body {
   100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
 
-/* ─── Undo Button ─── */
-.undo-btn {
-  position: fixed;
-  bottom: 16px;
-  left: 16px;
-  padding: 8px 16px;
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  background: rgba(0,0,0,0.3);
-  backdrop-filter: blur(4px);
-  color: var(--color-text);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.15s;
-  z-index: 100;
-}
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+  :root {
+    --card-width: 56px;
+    --card-height: 78px;
+    --card-gap: 4px;
+    --stack-overlap: 18px;
+  }
 
-.undo-btn:hover:not(:disabled) {
-  background: rgba(255,255,255,0.1);
-}
+  .app-header {
+    padding: 6px 8px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
 
-.undo-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
+  .app-title {
+    font-size: 0.95rem;
+  }
 
-/* ─── Score Bar ─── */
-.score-bar {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  padding: 4px 0;
-  font-size: 0.8rem;
-  color: var(--color-text-muted);
-}
+  .header-right {
+    gap: 6px;
+  }
 
-.score-bar span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
+  .game-btn {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
 
-.score-bar .score-value,
-.score-bar .moves-value {
-  color: var(--color-text);
-  font-weight: 600;
-  min-width: 20px;
-  text-align: center;
+  .draw-mode-btn {
+    padding: 2px 7px;
+    font-size: 0.7rem;
+  }
+
+  #game-container {
+    padding: 8px;
+  }
+
+  .klondike-tableau {
+    max-width: 100%;
+  }
+
+  .klondike-columns {
+    gap: 4px;
+  }
+
+  .card-center {
+    font-size: 1.4rem;
+  }
+
+  .card-rank {
+    font-size: 0.7rem;
+  }
+
+  .card-suit {
+    font-size: 0.55rem;
+  }
+
+  .column-pile .card {
+    top: 0 !important;
+  }
+
+  .column-pile .card:nth-child(n+2) {
+    margin-top: 18px;
+  }
+
+  .bottom-bar {
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  .win-banner {
+    font-size: 1.5rem;
+    padding: 16px 24px;
+  }
 }
 
 /* ─── Utility ─── */

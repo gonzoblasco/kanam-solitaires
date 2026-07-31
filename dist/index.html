@@ -4,19 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kanam's Solitaires</title>
-  <script type="module" crossorigin src="./assets/index-BcZKI8Pn.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-Cc_b27wh.css">
+  <script type="module" crossorigin src="./assets/index-CO25QPUI.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DgCT8V_p.css">
 </head>
 <body>
   <div id="app">
     <header class="app-header">
-      <h1 class="app-title">♠ Kanam's Solitaires ♥</h1>
-      <nav class="game-nav">
-        <button class="game-btn active" data-game="klondike">Klondike</button>
-        <button class="game-btn disabled" disabled title="Coming soon">Spider</button>
-        <button class="game-btn disabled" disabled title="Coming soon">FreeCell</button>
-        <button class="game-btn disabled" disabled title="Coming soon">Pyramid</button>
-      </nav>
+      <div class="header-left">
+        <h1 class="app-title">♠ Kanam's Solitaires ♥</h1>
+      </div>
+      <div class="header-right">
+        <nav class="game-nav">
+          <button class="game-btn active" data-game="klondike">Klondike</button>
+          <button class="game-btn disabled" disabled title="Coming soon">Spider</button>
+          <button class="game-btn disabled" disabled title="Coming soon">FreeCell</button>
+          <button class="game-btn disabled" disabled title="Coming soon">Pyramid</button>
+        </nav>
+        <div class="draw-mode-group">
+          <span class="draw-mode-label">Draw</span>
+          <button class="draw-mode-btn active" data-draw="1">1</button>
+          <button class="draw-mode-btn" data-draw="3">3</button>
+        </div>
+      </div>
     </header>
     <main id="game-container"></main>
   </div>

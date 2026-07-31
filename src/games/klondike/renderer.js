@@ -4,6 +4,7 @@
 
 import { createCardElement } from '../../lib/dom.js';
 import {
+  createKlondike,
   drawStock,
   wasteToFoundation,
   wasteToTableau,
@@ -13,10 +14,14 @@ import {
   getTableauRunStart,
   findAutoDestination,
   undo,
+  autoComplete,
   isGameWon,
 } from './klondike.js';
 
+let currentState = null;
+
 export function renderKlondike(container, state) {
+  currentState = state;
   container.innerHTML = '';
   const table = document.createElement('div');
   table.className = 'klondike-tableau';
@@ -66,22 +71,47 @@ export function renderKlondike(container, state) {
 
   container.appendChild(table);
 
-  // Undo button
+  // Bottom bar: undo, auto-complete, new game
+  const bottomBar = document.createElement('div');
+  bottomBar.className = 'bottom-bar';
+
   const undoBtn = document.createElement('button');
-  undoBtn.className = 'undo-btn';
+  undoBtn.className = 'action-btn';
   undoBtn.textContent = '↩ Undo';
   undoBtn.disabled = state.history.length === 0;
   undoBtn.addEventListener('click', () => {
     undo(state);
     rerender(state);
   });
-  container.appendChild(undoBtn);
+  bottomBar.appendChild(undoBtn);
+
+  const autoBtn = document.createElement('button');
+  autoBtn.className = 'action-btn';
+  autoBtn.textContent = '✨ Auto';
+  autoBtn.addEventListener('click', () => {
+    const moved = autoComplete(state);
+    if (moved > 0) rerender(state);
+  });
+  bottomBar.appendChild(autoBtn);
+
+  const newGameBtn = document.createElement('button');
+  newGameBtn.className = 'action-btn new-game-btn';
+  newGameBtn.textContent = '♠ New Game';
+  newGameBtn.addEventListener('click', () => {
+    if (state.moves === 0 || confirm('Start a new game? Current progress will be lost.')) {
+      const newState = createKlondike(state.drawMode);
+      renderKlondike(document.getElementById('game-container'), newState);
+    }
+  });
+  bottomBar.appendChild(newGameBtn);
+
+  container.appendChild(bottomBar);
 
   // Win banner
   if (isGameWon(state)) {
     const winBanner = document.createElement('div');
     winBanner.className = 'win-banner';
-    winBanner.textContent = '🎉 You Win! 🎉';
+    winBanner.innerHTML = '🎉 You Win! 🎉<br><small>Score: ' + state.score + ' · Moves: ' + state.moves + '</small>';
     container.appendChild(winBanner);
   }
 }
@@ -123,24 +153,37 @@ function createWasteElement(state) {
   el.dataset.pile = 'waste';
 
   if (state.waste.length > 0) {
-    const card = state.waste[state.waste.length - 1];
-    const cardEl = createCardElement(card);
-    cardEl.draggable = true;
-    cardEl.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', 'waste-top');
-    });
-    cardEl.addEventListener('dblclick', () => {
-      const dest = findAutoDestination(state, card, 'waste', null, null);
-      if (dest) {
-        if (dest.type === 'foundation') {
-          wasteToFoundation(state, dest.index);
-        } else if (dest.type === 'tableau') {
-          wasteToTableau(state, dest.index);
-        }
-        rerender(state);
+    // Show up to 3 cards overlapping for visual context
+    const visibleCount = Math.min(state.waste.length, 3);
+    const startIdx = state.waste.length - visibleCount;
+
+    for (let i = startIdx; i < state.waste.length; i++) {
+      const card = state.waste[i];
+      const cardEl = createCardElement(card);
+      cardEl.style.left = `${(i - startIdx) * 12}px`;
+      cardEl.style.zIndex = i;
+
+      // Only the top card is interactive
+      if (i === state.waste.length - 1) {
+        cardEl.draggable = true;
+        cardEl.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', 'waste-top');
+        });
+        cardEl.addEventListener('dblclick', () => {
+          const dest = findAutoDestination(state, card, 'waste', null, null);
+          if (dest) {
+            if (dest.type === 'foundation') {
+              wasteToFoundation(state, dest.index);
+            } else if (dest.type === 'tableau') {
+              wasteToTableau(state, dest.index);
+            }
+            rerender(state);
+          }
+        });
       }
-    });
-    el.appendChild(cardEl);
+
+      el.appendChild(cardEl);
+    }
   } else {
     const empty = document.createElement('div');
     empty.className = 'pile-target';
