@@ -941,7 +941,6 @@ body {
   flex-direction: column;
   gap: clamp(2px, 0.8vw, 6px);
   width: 100%;
-  max-width: calc(var(--pyramid-card-width) * 7 + var(--card-gap) * 6 + var(--side-bar-width) + 40px);
   position: relative;
   z-index: 1;
   align-items: center;
@@ -960,14 +959,14 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(2px, 0.6vw, 4px);
+  /* Slight vertical overlap to fit viewport */
+  gap: calc(var(--pyramid-card-height) * -0.32);
 }
 
 .pyramid-row {
   display: flex;
   gap: clamp(2px, 0.6vw, 4px);
   position: relative;
-  z-index: 1;
 }
 
 .pyramid-row .card {
@@ -976,17 +975,14 @@ body {
   transition: transform 0.1s, box-shadow 0.1s;
   width: var(--pyramid-card-width, var(--card-width));
   height: var(--pyramid-card-height, var(--card-height));
-  z-index: 1;
 }
 
 .pyramid-row .card:hover {
-  transform: translateY(-2px);
-  z-index: 10;
+  transform: translateY(-6px);
 }
 
 .pyramid-row .card.selected {
   box-shadow: 0 0 0 3px var(--color-gold), 0 4px 12px rgba(0,0,0,0.4);
-  z-index: 10;
 }
 
 .pyramid-row .card.card-removed {

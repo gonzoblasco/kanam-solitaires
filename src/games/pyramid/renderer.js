@@ -63,6 +63,7 @@ export function renderPyramid(container, state, isNew = false) {
   state.pyramid.forEach((row, rowIdx) => {
     const rowEl = document.createElement('div');
     rowEl.className = 'pyramid-row';
+    rowEl.style.zIndex = 7 - rowIdx;
     row.forEach((card, colIdx) => {
       const cardEl = createCardElement(card);
       cardEl.dataset.row = rowIdx;
