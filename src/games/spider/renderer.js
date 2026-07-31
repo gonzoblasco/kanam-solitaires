@@ -3,7 +3,7 @@
  */
 
 import { createCardElement } from '../../lib/dom.js';
-import { showModal } from '../../lib/modal.js';
+import { showModal, showHelpModal } from '../../lib/modal.js';
 import { getStats, recordGame, resetStats, getAllStats } from '../../lib/stats.js';
 import { playClick, playSlide, playFoundation, playVictory } from '../../lib/sound.js';
 import {
@@ -109,6 +109,13 @@ export function renderSpider(container, state, isNew = false) {
     }
   });
   bottomBar.appendChild(newGameBtn);
+
+  const helpBtn = document.createElement('button');
+  helpBtn.className = 'action-btn';
+  helpBtn.textContent = '❓ Help';
+  helpBtn.addEventListener('click', () => showHelpModal('spider'));
+  bottomBar.appendChild(helpBtn);
+
   container.appendChild(bottomBar);
 
   // Win

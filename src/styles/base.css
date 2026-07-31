@@ -686,6 +686,37 @@ body {
   }
 }
 
+/* ─── Help Content ─── */
+.help-content {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.help-content p {
+  margin-bottom: 12px;
+}
+
+.help-content h3 {
+  font-size: 0.95rem;
+  margin: 16px 0 8px;
+  color: var(--color-gold);
+}
+
+.help-content ul {
+  margin: 0 0 12px 18px;
+  padding: 0;
+}
+
+.help-content li {
+  margin-bottom: 6px;
+}
+
+.help-content strong {
+  color: var(--color-gold-light);
+}
+
 /* ─── Modal ─── */
 .modal-overlay {
   position: fixed;

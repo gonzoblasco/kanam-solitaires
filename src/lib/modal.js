@@ -11,6 +11,33 @@
  *   });
  */
 
+import { getRules } from './rules.js';
+
+/**
+ * Show a help modal with the rules of the current game.
+ */
+export function showHelpModal(gameName) {
+  const rules = getRules(gameName);
+  if (!rules) return Promise.resolve(false);
+
+  const sections = [];
+  sections.push(`<p><strong>Goal:</strong> ${rules.goal}</p>`);
+  sections.push('<ul>' + rules.rules.map(r => `<li>${r}</li>`).join('') + '</ul>');
+  if (rules.scoring) {
+    sections.push('<h3>Scoring</h3><ul>' + rules.scoring.map(s => `<li>${s}</li>`).join('') + '</ul>');
+  }
+  if (rules.variants) {
+    sections.push('<h3>Variants</h3><ul>' + rules.variants.map(v => `<li>${v}</li>`).join('') + '</ul>');
+  }
+
+  return showModal({
+    title: `❓ ${rules.title} — Help`,
+    message: `<div class="help-content">${sections.join('')}</div>`,
+    confirmText: 'Got it',
+    cancelText: null,
+  });
+}
+
 export function showModal({ title, message, confirmText = 'OK', cancelText = 'Cancel', onConfirm, onCancel }) {
   // Remove any existing modal
   const existing = document.querySelector('.modal-overlay');
