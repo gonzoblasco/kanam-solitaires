@@ -95,7 +95,7 @@ export function renderKlondike(container, state, isNew = false) {
   const columnsEl = document.createElement('div');
   columnsEl.className = 'klondike-columns';
   state.tableau.forEach((_, i) => {
-    columnsEl.appendChild(createColumnElement(state, i));
+    columnsEl.appendChild(createColumnElement(state, i, isNew));
   });
   table.appendChild(columnsEl);
 
@@ -318,7 +318,7 @@ function createFoundationElement(state, index) {
   return el;
 }
 
-function createColumnElement(state, colIndex) {
+function createColumnElement(state, colIndex, isNew) {
   const el = document.createElement('div');
   el.className = 'klondike-column';
   el.dataset.pile = 'column';
