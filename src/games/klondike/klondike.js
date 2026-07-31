@@ -44,6 +44,10 @@ export function createKlondike(drawMode = 1) {
     moves: 0,
     history: [],
     drawMode,
+    startTime: null,
+    elapsed: 0,
+    timerRunning: false,
+    won: false,
   };
 }
 
@@ -87,6 +91,47 @@ export function undo(state) {
   return true;
 }
 
+/* ─── Timer ─── */
+
+/**
+ * Start the timer on the first move.
+ */
+export function startTimer(state) {
+  if (!state.timerRunning && !state.won) {
+    state.startTime = Date.now() - state.elapsed;
+    state.timerRunning = true;
+  }
+}
+
+/**
+ * Stop the timer (e.g., on win).
+ */
+export function stopTimer(state) {
+  if (state.timerRunning) {
+    state.elapsed = Date.now() - state.startTime;
+    state.timerRunning = false;
+  }
+}
+
+/**
+ * Update elapsed time (called by setInterval in renderer).
+ */
+export function tickTimer(state) {
+  if (state.timerRunning && !state.won) {
+    state.elapsed = Date.now() - state.startTime;
+  }
+}
+
+/**
+ * Format elapsed ms to MM:SS.
+ */
+export function formatTime(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
 /* ─── Stock & Waste ─── */
 
 /**
@@ -105,6 +150,7 @@ export function drawStock(state) {
       state.waste.push(card);
     }
     state.moves++;
+    startTimer(state);
     return true;
   }
 
@@ -116,6 +162,7 @@ export function drawStock(state) {
     }
     state.stock.push(...cards);
     state.moves++;
+    startTimer(state);
     return true;
   }
 
@@ -163,6 +210,7 @@ export function wasteToFoundation(state, foundationIndex) {
   state.foundations[foundationIndex].push(state.waste.pop());
   state.score += 10;
   state.moves++;
+  startTimer(state);
   return true;
 }
 
@@ -176,6 +224,7 @@ export function wasteToTableau(state, columnIndex) {
   pushUndo(state);
   state.tableau[columnIndex].push(state.waste.pop());
   state.moves++;
+  startTimer(state);
   return true;
 }
 
@@ -228,6 +277,7 @@ export function moveTableauRun(state, sourceCol, cardIndex, targetCol) {
   }
 
   state.moves++;
+  startTimer(state);
   return true;
 }
 
@@ -255,6 +305,7 @@ export function tableauToFoundation(state, colIndex, foundationIndex) {
 
   state.score += 10;
   state.moves++;
+  startTimer(state);
   return true;
 }
 
@@ -272,6 +323,7 @@ export function foundationToTableau(state, foundationIndex, colIndex) {
   pushUndo(state);
   state.tableau[colIndex].push(foundation.pop());
   state.moves++;
+  startTimer(state);
   return true;
 }
 
@@ -316,6 +368,7 @@ export function autoComplete(state) {
 
   while (found) {
     found = false;
+    startTimer(state);
 
     // Check waste
     if (state.waste.length > 0) {

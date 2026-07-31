@@ -16,12 +16,35 @@ import {
   undo,
   autoComplete,
   isGameWon,
+  formatTime,
+  tickTimer,
+  stopTimer,
 } from './klondike.js';
 
 let currentState = null;
+let timerInterval = null;
+
+function startTimerDisplay(state) {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    tickTimer(state);
+    const timerEl = document.getElementById('timer-display');
+    if (timerEl) {
+      timerEl.textContent = formatTime(state.elapsed);
+    }
+  }, 1000);
+}
+
+function stopTimerDisplay() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
 
 export function renderKlondike(container, state) {
   currentState = state;
+  stopTimerDisplay();
   container.innerHTML = '';
   const table = document.createElement('div');
   table.className = 'klondike-tableau';
@@ -30,10 +53,13 @@ export function renderKlondike(container, state) {
   const scoreBar = document.createElement('div');
   scoreBar.className = 'score-bar';
   scoreBar.innerHTML = `
+    <span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span>
     <span>Score: <span class="score-value">${state.score}</span></span>
     <span>Moves: <span class="moves-value">${state.moves}</span></span>
   `;
   table.appendChild(scoreBar);
+
+  startTimerDisplay(state);
 
   // Top row: stock, waste, foundations
   const topRow = document.createElement('div');
@@ -109,9 +135,11 @@ export function renderKlondike(container, state) {
 
   // Win banner
   if (isGameWon(state)) {
+    stopTimer(state);
+    stopTimerDisplay();
     const winBanner = document.createElement('div');
     winBanner.className = 'win-banner';
-    winBanner.innerHTML = '🎉 You Win! 🎉<br><small>Score: ' + state.score + ' · Moves: ' + state.moves + '</small>';
+    winBanner.innerHTML = '🎉 You Win! 🎉<br><small>Time: ' + formatTime(state.elapsed) + ' · Score: ' + state.score + ' · Moves: ' + state.moves + '</small>';
     container.appendChild(winBanner);
   }
 }
