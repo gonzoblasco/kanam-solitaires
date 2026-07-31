@@ -42,6 +42,7 @@ export function createSpider(difficulty = 1) {
       }
     }
   }
+
   const deck = shuffle(cards);
 
   // Deal tableau
@@ -50,24 +51,22 @@ export function createSpider(difficulty = 1) {
   for (let col = 0; col < 10; col++) {
     const count = col < 6 ? 6 : 5;
     const colCards = [];
-    for (let row = 0; row < count; row++) {
+    for (let r = 0; r < count; r++) {
       const card = deck[idx++];
-      card.faceUp = row === count - 1;
+      card.faceUp = r === count - 1; // last card in each column face up
       colCards.push(card);
     }
     tableau.push(colCards);
   }
 
-  // Remaining cards go to stock
-  const stock = deck.slice(idx).map(c => ({ ...c, faceUp: false }));
-
+  const stock = deck.slice(idx);
   return {
+    difficulty,
     tableau,
     stock,
     score: 0,
     moves: 0,
     history: [],
-    difficulty,
     startTime: null,
     elapsed: 0,
     timerRunning: false,
@@ -121,23 +120,16 @@ export function stopTimer(state) {
 }
 
 export function tickTimer(state) {
-  if (state.timerRunning && !state.won) {
-    state.elapsed = Date.now() - state.startTime;
-  }
+  if (state.timerRunning && !state.won) state.elapsed = Date.now() - state.startTime;
 }
 
 export function formatTime(ms) {
-  const totalSeconds = Math.floor(ms / 1000);
-  return `${String(Math.floor(totalSeconds / 60)).padStart(2, '0')}:${String(totalSeconds % 60).padStart(2, '0')}`;
+  const s = Math.floor(ms / 1000);
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 }
 
 /* ─── Validation ─── */
 
-/**
- * Can a card be placed on a column?
- * In Spider, cards build down regardless of color.
- * For difficulty > 1, the run must be of the same suit group.
- */
 export function canMoveToColumn(card, column) {
   if (column.length === 0) return true;
   const top = column[column.length - 1];
@@ -205,49 +197,52 @@ function checkAllColumns(state) {
   }
 }
 
-export { checkAllColumns };
-
 /**
- * Check if the last 13 cards of a column form a complete K→A run of the same suit.
- * If so, remove them.
+ * Check if any 13 consecutive face-up cards of the same suit form a complete run.
+ * Accepts A→K ascending or K→A descending (tableau order).
  */
 export function checkCompleteRun(state, colIndex) {
   const column = state.tableau[colIndex];
   if (column.length < 13) return false;
 
-  // Look for any complete A→K run of the same suit anywhere in the column
   for (let start = 0; start <= column.length - 13; start++) {
     const run = column.slice(start, start + 13);
+    if (run.some(c => !c.faceUp)) continue;
 
-    // Must be A→K of the same suit
     const suit = run[0].suit;
-    if (run[0].rank !== 'A') continue;
-    let valid = true;
+    if (run.some(c => c.suit !== suit)) continue;
+
+    const ranks = run.map(c => rankValue(c.rank));
+
+    // A→K ascending
+    let ascending = true;
     for (let i = 0; i < 12; i++) {
-      if (run[i].suit !== suit || rankValue(run[i].rank) !== rankValue(run[i + 1].rank) - 1) {
-        valid = false;
-        break;
-      }
+      if (ranks[i + 1] !== ranks[i] + 1) { ascending = false; break; }
     }
-    if (!valid || run[12].rank !== 'K') continue;
-
-    // Found a complete run — remove it
-    column.splice(start, 13);
-    state.score += 100;
-
-    // Flip new top card if any card below was face-down
-    if (start > 0 && column[start - 1] && !column[start - 1].faceUp) {
-      column[start - 1].faceUp = true;
-      state.score += 5;
-    } else if (column.length > 0) {
-      const newTop = column[column.length - 1];
-      if (!newTop.faceUp) {
-        newTop.faceUp = true;
-        state.score += 5;
+    if (ascending && run[0].rank === 'A' && run[12].rank === 'K') {
+      column.splice(start, 13);
+      state.score += 100;
+      if (column.length > 0) {
+        const newTop = column[column.length - 1];
+        if (!newTop.faceUp) { newTop.faceUp = true; state.score += 5; }
       }
+      return true;
     }
 
-    return true;
+    // K→A descending
+    let descending = true;
+    for (let i = 0; i < 12; i++) {
+      if (ranks[i + 1] !== ranks[i] - 1) { descending = false; break; }
+    }
+    if (descending && run[0].rank === 'K' && run[12].rank === 'A') {
+      column.splice(start, 13);
+      state.score += 100;
+      if (column.length > 0) {
+        const newTop = column[column.length - 1];
+        if (!newTop.faceUp) { newTop.faceUp = true; state.score += 5; }
+      }
+      return true;
+    }
   }
 
   return false;
@@ -278,20 +273,20 @@ export function drawStock(state) {
   return true;
 }
 
-/* ─── Hint ─── */
+/* ─── Hints ─── */
 
 export function findHint(state) {
-  // 1. Try to move a run to complete another run
+  // Find any exposed run that can move to another column
   for (let srcCol = 0; srcCol < 10; srcCol++) {
     const column = state.tableau[srcCol];
-    for (let cardIdx = 0; cardIdx < column.length; cardIdx++) {
-      const runStart = getRunStart(column, cardIdx);
+    for (let cardIndex = 0; cardIndex < column.length; cardIndex++) {
+      const runStart = getRunStart(column, cardIndex);
       if (runStart === -1) continue;
       const runCard = column[runStart];
       for (let dstCol = 0; dstCol < 10; dstCol++) {
         if (dstCol === srcCol) continue;
         if (canMoveToColumn(runCard, state.tableau[dstCol])) {
-          return { source: 'tableau', sourceIndex: srcCol, cardIndex: runStart, dest: 'tableau', destIndex: dstCol };
+          return { sourceCol: srcCol, cardIndex: runStart, destCol: dstCol };
         }
       }
     }
@@ -299,15 +294,28 @@ export function findHint(state) {
   return null;
 }
 
-/* ─── Auto-complete ─── */
-
 export function autoComplete(state) {
-  // In Spider, auto-complete means finding and completing runs
-  // This is complex; for now, just find hints
-  return 0;
+  let moved = 0;
+  let found = true;
+  while (found) {
+    found = false;
+    const hint = findHint(state);
+    if (hint) {
+      const column = state.tableau[hint.sourceCol];
+      const runStart = getRunStart(column, hint.cardIndex);
+      if (runStart !== -1) {
+        const cards = column.splice(runStart);
+        pushUndo(state);
+        state.tableau[hint.destCol].push(...cards);
+        state.moves++;
+        checkAllColumns(state);
+        moved++;
+        found = true;
+      }
+    }
+  }
+  return moved;
 }
-
-/* ─── Win ─── */
 
 export function isGameWon(state) {
   return state.tableau.every(col => col.length === 0);
