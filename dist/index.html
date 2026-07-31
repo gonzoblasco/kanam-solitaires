@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kanam's Solitaires</title>
-  <script type="module" crossorigin src="./assets/index-Dr33swrT.js"></script>
+  <script type="module" crossorigin src="./assets/index-BtQ977QT.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-DCgT1UD_.css">
 </head>
 <body>
@@ -14,25 +14,9 @@
         <h1 class="app-title">♠ Kanam's Solitaires ♥</h1>
       </div>
       <div class="header-right">
-        <nav class="game-nav">
-          <button class="game-btn active" data-game="klondike">Klondike</button>
-          <button class="game-btn disabled" disabled title="Coming soon">Spider</button>
-          <button class="game-btn disabled" disabled title="Coming soon">FreeCell</button>
-          <button class="game-btn disabled" disabled title="Coming soon">Pyramid</button>
-        </nav>
-        <div class="mode-selectors">
-          <div class="mode-group">
-            <span class="mode-label">Draw</span>
-            <button class="mode-btn draw-mode-btn active" data-draw="1">1</button>
-            <button class="mode-btn draw-mode-btn" data-draw="3">3</button>
-          </div>
-          <div class="mode-group">
-            <span class="mode-label">Score</span>
-            <button class="mode-btn scoring-btn active" data-scoring="standard">Std</button>
-            <button class="mode-btn scoring-btn" data-scoring="vegas">Vegas</button>
-          </div>
-          <button class="sound-toggle" id="sound-toggle" title="Toggle sound">🔇</button>
-        </div>
+        <nav class="game-nav" id="game-nav"></nav>
+        <div class="mode-selectors" id="game-options"></div>
+        <button class="sound-toggle" id="sound-toggle" title="Toggle sound">🔇</button>
       </div>
     </header>
     <main id="game-container"></main>
