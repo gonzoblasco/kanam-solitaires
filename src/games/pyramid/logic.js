@@ -162,6 +162,23 @@ export function toggleSelect(state, row, col) {
     return true;
   }
 
+  // If a waste card is already selected, try to pair
+  const wasteIdx = state.selected.findIndex(s => s.source === 'waste');
+  if (wasteIdx !== -1) {
+    const wasteCard = state.waste[state.waste.length - 1];
+    if (wasteCard && cardsSumTo13(card, wasteCard)) {
+      pushUndo(state);
+      card.removed = true;
+      state.waste.pop();
+      state.selected = [];
+      state.score += 20;
+      state.moves++;
+      startTimer(state);
+      return true;
+    }
+    return false;
+  }
+
   // Can't select more than 2
   if (state.selected.length >= 2) return false;
 
@@ -213,11 +230,12 @@ export function removeSelected(state) {
  */
 export function selectWaste(state) {
   if (state.waste.length === 0) return false;
-  if (state.selected.length >= 2) return false;
+  if (state.selected.some(s => s.source === 'waste')) return false;
 
   const card = state.waste[state.waste.length - 1];
+
   // Check if it pairs with a selected pyramid card
-  if (state.selected.length === 1) {
+  if (state.selected.length > 0) {
     const { row, col } = state.selected[0];
     const pyramidCard = state.pyramid[row][col];
     if (cardsSumTo13(card, pyramidCard)) {
@@ -230,30 +248,21 @@ export function selectWaste(state) {
       startTimer(state);
       return true;
     }
-    if (isKing(card)) {
-      pushUndo(state);
-      state.waste.pop();
-      state.selected = [];
-      state.score += 10;
-      state.moves++;
-      startTimer(state);
-      return true;
-    }
-    return false;
   }
 
-  // Select waste card alone (must pair with another or be king)
+  // King can be removed alone from waste
   if (isKing(card)) {
     pushUndo(state);
     state.waste.pop();
+    state.selected = [];
     state.score += 10;
     state.moves++;
     startTimer(state);
     return true;
   }
 
-  // Add to selection
-  state.selected.push({ source: 'waste' });
+  // Select waste card alone
+  state.selected = [{ source: 'waste' }];
   return true;
 }
 
