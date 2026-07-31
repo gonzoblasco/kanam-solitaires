@@ -40,6 +40,7 @@ function stopTimerDisplay() {
 
 export function renderFreeCell(container, state, isNew = false) {
   currentState = state;
+  window.__freecellState__ = state;
   stopTimerDisplay();
   container.innerHTML = '';
   const table = document.createElement('div');
