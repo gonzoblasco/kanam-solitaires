@@ -261,13 +261,11 @@ export function moveTableauRun(state, sourceCol, cardIndex, targetCol) {
   const runStart = getTableauRunStart(state.tableau[sourceCol], cardIndex);
   if (runStart === -1) return false;
 
-  const cards = state.tableau[sourceCol].splice(runStart);
-  if (!canMoveToTableau(cards[0], state.tableau[targetCol])) {
-    state.tableau[sourceCol].push(...cards);
-    return false;
-  }
+  const cards = state.tableau[sourceCol].slice(runStart);
+  if (!canMoveToTableau(cards[0], state.tableau[targetCol])) return false;
 
   pushUndo(state);
+  state.tableau[sourceCol].splice(runStart);
   state.tableau[targetCol].push(...cards);
 
   // Flip the new top card of source column if face down
