@@ -146,13 +146,11 @@ export function moveRun(state, sourceCol, cardIndex, targetCol) {
   const runStart = getRunStart(state.tableau[sourceCol], cardIndex, maxMovable);
   if (runStart === -1) return false;
 
-  const cards = state.tableau[sourceCol].splice(runStart);
-  if (!canMoveToColumn(cards[0], state.tableau[targetCol])) {
-    state.tableau[sourceCol].push(...cards);
-    return false;
-  }
+  const cards = state.tableau[sourceCol].slice(runStart);
+  if (!canMoveToColumn(cards[0], state.tableau[targetCol])) return false;
 
   pushUndo(state);
+  state.tableau[sourceCol].splice(runStart);
   state.tableau[targetCol].push(...cards);
   state.moves++;
   startTimer(state);
@@ -206,7 +204,8 @@ export function tableauToFoundation(state, colIndex, foundationIndex) {
   if (!canMoveToFoundation(card, state.foundations[foundationIndex])) return false;
 
   pushUndo(state);
-  state.foundations[foundationIndex].push(column.pop());
+  state.foundations[foundationIndex].push(card);
+  column.pop();
   state.score += 10;
   state.moves++;
   startTimer(state);
