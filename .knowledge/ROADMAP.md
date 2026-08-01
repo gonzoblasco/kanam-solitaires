@@ -98,9 +98,9 @@
 - [x] Contraste de colores verificado
 
 ### 6.4 Sonido
-- [ ] Volumen ajustable
-- [ ] Sonidos individuales on/off (slide, foundation, victory)
-- [ ] Mantener off por default
+- [x] Volumen ajustable
+- [x] Sonidos individuales on/off (slide, foundation, victory)
+- [x] Mantener off por default
 
 ### 6.5 Tests
 - [x] `vitest` + `happy-dom`

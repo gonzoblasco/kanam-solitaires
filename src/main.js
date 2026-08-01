@@ -8,7 +8,7 @@ import * as pyramid from './games/pyramid/index.js';
 import * as spider from './games/spider/index.js';
 import { getGame, getGames, registerGame, resumeGame, startGame } from './lib/gameRegistry.js';
 import { loadGameState } from './lib/saveState.js';
-import { isSoundEnabled, setSoundEnabled } from './lib/sound.js';
+import { isSoundEnabled, setSoundEnabled, getVolume, setVolume, isSoundTypeEnabled, setSoundTypeEnabled, SOUND_TYPES, resetSoundSettings } from './lib/sound.js';
 
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {
@@ -95,11 +95,12 @@ function startCurrentGame(resumeIfSaved = true) {
   startGame(currentGameName, container, currentOptions);
 }
 
-// Sound toggle
+// Sound toggle opens sound settings panel
 const soundToggle = document.getElementById('sound-toggle');
 if (soundToggle) {
-  soundToggle.setAttribute('aria-label', 'Toggle sound');
-  soundToggle.setAttribute('aria-pressed', String(isSoundEnabled()));
+  soundToggle.setAttribute('aria-label', 'Sound settings');
+  soundToggle.setAttribute('aria-haspopup', 'dialog');
+  soundToggle.setAttribute('aria-expanded', 'false');
 }
 function updateSoundToggle() {
   const enabled = isSoundEnabled();
@@ -108,8 +109,7 @@ function updateSoundToggle() {
 }
 updateSoundToggle();
 soundToggle.addEventListener('click', () => {
-  setSoundEnabled(!isSoundEnabled());
-  updateSoundToggle();
+  showSoundPanel();
 });
 
 // Keyboard: activate focused cards/buttons with Enter/Space
@@ -130,3 +130,113 @@ document.addEventListener('keydown', (e) => {
 // Start
 buildOptions(klondike);
 startCurrentGame();
+
+/* ─── Sound Settings Panel ─── */
+
+const SOUND_LABELS = {
+  click: 'Card click',
+  slide: 'Card slide',
+  flip: 'Card flip',
+  foundation: 'Foundation',
+  victory: 'Victory',
+};
+
+function showSoundPanel() {
+  const existing = document.getElementById('sound-panel-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'sound-panel-overlay';
+  overlay.className = 'modal-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.setAttribute('aria-labelledby', 'sound-panel-title');
+
+  const box = document.createElement('div');
+  box.className = 'modal-box sound-panel';
+  box.innerHTML = `
+    <h2 id="sound-panel-title" class="modal-title">🔊 Sound Settings</h2>
+    <div class="sound-panel-content">
+      <label class="sound-row sound-master">
+        <span class="sound-label">Master</span>
+        <input type="checkbox" id="sound-master-toggle" ${isSoundEnabled() ? 'checked' : ''} />
+        <span class="sound-status" id="sound-master-status">${isSoundEnabled() ? 'On' : 'Off'}</span>
+      </label>
+
+      <div class="sound-row sound-volume">
+        <label for="sound-volume-slider" class="sound-label">Volume</label>
+        <input type="range" id="sound-volume-slider" min="0" max="100" value="${Math.round(getVolume() * 100)}" />
+        <span class="sound-value" id="sound-volume-value">${Math.round(getVolume() * 100)}%</span>
+      </div>
+
+      <fieldset class="sound-types">
+        <legend class="sound-legend">Sound types</legend>
+        ${SOUND_TYPES.map((type) => `
+          <label class="sound-row">
+            <span class="sound-label">${SOUND_LABELS[type]}</span>
+            <input type="checkbox" class="sound-type-toggle" data-type="${type}" ${isSoundTypeEnabled(type) ? 'checked' : ''} />
+          </label>
+        `).join('')}
+      </fieldset>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn modal-confirm" id="sound-close-btn">Close</button>
+    </div>
+  `;
+
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+
+  soundToggle.setAttribute('aria-expanded', 'true');
+
+  requestAnimationFrame(() => {
+    overlay.classList.add('visible');
+    box.classList.add('visible');
+  });
+
+  const close = () => {
+    overlay.classList.remove('visible');
+    box.classList.remove('visible');
+    setTimeout(() => {
+      overlay.remove();
+      soundToggle.setAttribute('aria-expanded', 'false');
+    }, 200);
+  };
+
+  const masterToggle = box.querySelector('#sound-master-toggle');
+  const masterStatus = box.querySelector('#sound-master-status');
+  masterToggle.addEventListener('change', () => {
+    const enabled = masterToggle.checked;
+    setSoundEnabled(enabled);
+    masterStatus.textContent = enabled ? 'On' : 'Off';
+    updateSoundToggle();
+  });
+
+  const volumeSlider = box.querySelector('#sound-volume-slider');
+  const volumeValue = box.querySelector('#sound-volume-value');
+  volumeSlider.addEventListener('input', () => {
+    const value = Number.parseInt(volumeSlider.value, 10) / 100;
+    setVolume(value);
+    volumeValue.textContent = `${volumeSlider.value}%`;
+  });
+
+  box.querySelectorAll('.sound-type-toggle').forEach((toggle) => {
+    toggle.addEventListener('change', () => {
+      setSoundTypeEnabled(toggle.dataset.type, toggle.checked);
+    });
+  });
+
+  box.querySelector('#sound-close-btn').addEventListener('click', close);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
+
+  document.addEventListener('keydown', function handler(e) {
+    if (e.key === 'Escape') {
+      document.removeEventListener('keydown', handler);
+      close();
+    }
+  });
+
+  box.querySelector('#sound-close-btn').focus();
+}
