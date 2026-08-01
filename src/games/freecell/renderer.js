@@ -5,6 +5,7 @@
 import { announce } from '../../lib/announcer.js';
 import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
+import { saveGameState } from '../../lib/saveState.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
 import { getAllStats, getStats, recordGame, resetStats } from '../../lib/stats.js';
 import {
@@ -190,6 +191,7 @@ export function renderFreeCell(container, state, isNew = false) {
 }
 
 function rerender(state) {
+  saveGameState('freecell', state);
   renderFreeCell(document.getElementById('game-container'), state, false);
 }
 

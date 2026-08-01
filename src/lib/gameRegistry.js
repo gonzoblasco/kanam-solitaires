@@ -52,6 +52,23 @@ export function startGame(name, container, options = {}) {
 }
 
 /**
+ * Resume a saved game state in a container.
+ */
+export function resumeGame(name, container, state) {
+  if (currentGame?.destroy) {
+    currentGame.destroy();
+  }
+  currentContainer = container;
+  const game = games.get(name);
+  if (!game || !game.resume) {
+    console.error(`Game "${name}" cannot resume`);
+    return null;
+  }
+  currentGame = game;
+  return game.resume(container, state);
+}
+
+/**
  * Get current game instance state (if needed).
  */
 export function getCurrentGame() {

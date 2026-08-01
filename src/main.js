@@ -6,7 +6,8 @@ import * as freecell from './games/freecell/index.js';
 import * as klondike from './games/klondike/index.js';
 import * as pyramid from './games/pyramid/index.js';
 import * as spider from './games/spider/index.js';
-import { getGames, registerGame, startGame } from './lib/gameRegistry.js';
+import { getGame, getGames, registerGame, resumeGame, startGame } from './lib/gameRegistry.js';
+import { loadGameState } from './lib/saveState.js';
 import { isSoundEnabled, setSoundEnabled } from './lib/sound.js';
 
 // Register service worker for PWA
@@ -44,7 +45,7 @@ games.forEach((game) => {
     btn.classList.add('active');
     currentGameName = game.name;
     buildOptions(game);
-    startCurrentGame();
+    startCurrentGame(true);
   });
   gameNav.appendChild(btn);
 });
@@ -73,16 +74,24 @@ function buildOptions(game) {
       const key = btn.dataset.opt;
       const val = btn.dataset.val;
       // Parse numbers
-      currentOptions[key] = Number.isNaN(val) ? val : Number(val);
+      currentOptions[key] = Number.isNaN(Number(val)) ? val : Number(val);
       // Update active state
       btn.parentElement.querySelectorAll('.game-opt-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
-      startCurrentGame();
+      startCurrentGame(false);
     });
   });
 }
 
-function startCurrentGame() {
+function startCurrentGame(resumeIfSaved = true) {
+  if (resumeIfSaved) {
+    const saved = loadGameState();
+    const game = getGame(currentGameName);
+    if (saved && saved.game === currentGameName && game?.resume) {
+      resumeGame(currentGameName, container, saved.state);
+      return;
+    }
+  }
   startGame(currentGameName, container, currentOptions);
 }
 

@@ -301,7 +301,11 @@ export function renderKlondike(container, state, isNew = false) {
   }
 }
 
+import { saveGameState } from '../../lib/saveState.js';
+import { startGame } from '../../lib/stats.js';
+
 function rerender(state) {
+  saveGameState('klondike', state);
   renderKlondike(document.getElementById('game-container'), state, false);
 }
 

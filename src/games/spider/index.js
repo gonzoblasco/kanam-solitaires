@@ -2,6 +2,8 @@
  * Spider Solitaire — entry point.
  */
 
+import { clearGameState } from '../../lib/saveState.js';
+import { startGame } from '../../lib/stats.js';
 import { createSpider } from './logic.js';
 import { renderSpider } from './renderer.js';
 
@@ -17,12 +19,17 @@ export function getOptions() {
   };
 }
 
-import { startGame } from '../../lib/stats.js';
+export function resume(container, state) {
+  currentState = state;
+  renderSpider(container, state, false);
+  return currentState;
+}
 
 export function init(container, options = {}) {
   const difficulty = options.difficulty ?? 1;
   const variant = options.variant ?? 'classic';
   currentState = createSpider(difficulty, variant);
+  clearGameState();
   startGame('spider', `diff${difficulty}-${variant}`);
   renderSpider(container, currentState, true);
   return currentState;
