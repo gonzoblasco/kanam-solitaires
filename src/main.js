@@ -9,6 +9,16 @@ import * as spider from './games/spider/index.js';
 import { getGames, registerGame, startGame } from './lib/gameRegistry.js';
 import { isSoundEnabled, setSoundEnabled } from './lib/sound.js';
 
+// Register service worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/kanam-solitaires/sw.js')
+      .then((reg) => console.log('SW registered:', reg.scope))
+      .catch((err) => console.error('SW registration failed:', err));
+  });
+}
+
 // Register games
 registerGame(klondike);
 registerGame(spider);
