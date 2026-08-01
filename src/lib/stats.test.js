@@ -1,5 +1,5 @@
-import { describe, expect, it, beforeEach } from 'vitest';
-import { getStats, startGame, recordGame, resetStats } from './stats.js';
+import { beforeEach, describe, expect, it } from 'vitest';
+import { getStats, recordGame, resetStats, startGame } from './stats.js';
 
 describe('Stats', () => {
   beforeEach(() => {

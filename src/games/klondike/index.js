@@ -2,9 +2,9 @@
  * Klondike game entry point.
  */
 
+import { startGame } from '../../lib/stats.js';
 import { createKlondike } from './klondike.js';
 import { renderKlondike } from './renderer.js';
-import { startGame } from '../../lib/stats.js';
 
 let currentState = null;
 let currentContainer = null;
