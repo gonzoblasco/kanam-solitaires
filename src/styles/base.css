@@ -88,6 +88,8 @@ body {
   background: linear-gradient(180deg, var(--color-bg-light), var(--color-bg));
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .app-title {
@@ -531,43 +533,47 @@ body {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* ─── Draw Mode & Scoring Mode Selectors ─── */
 .mode-selectors {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .mode-group {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 1px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
-  padding: 2px;
+  padding: 1px;
 }
 
 .mode-label {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: var(--color-text-muted);
-  padding: 0 5px;
+  padding: 0 4px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .mode-btn {
-  padding: 3px 8px;
+  padding: 2px 6px;
   border: none;
   border-radius: 4px;
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
+  white-space: nowrap;
 }
 
 .mode-btn:hover {
