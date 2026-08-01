@@ -16,9 +16,12 @@ export function getOptions() {
   };
 }
 
+import { startGame } from '../../lib/stats.js';
+
 export function init(container, options = {}) {
   const variant = options.variant ?? 'classic';
   currentState = createFreeCell(variant);
+  startGame('freecell', variant);
   renderFreeCell(container, currentState, true);
   return currentState;
 }

@@ -16,9 +16,12 @@ export function getOptions() {
   };
 }
 
+import { startGame } from '../../lib/stats.js';
+
 export function init(container, options = {}) {
   const variant = options.variant ?? 'classic';
   currentState = createPyramid(variant);
+  startGame('pyramid', variant);
   renderPyramid(container, currentState, true);
   return currentState;
 }

@@ -17,10 +17,13 @@ export function getOptions() {
   };
 }
 
+import { startGame } from '../../lib/stats.js';
+
 export function init(container, options = {}) {
   const difficulty = options.difficulty ?? 1;
   const variant = options.variant ?? 'classic';
   currentState = createSpider(difficulty, variant);
+  startGame('spider', `diff${difficulty}-${variant}`);
   renderSpider(container, currentState, true);
   return currentState;
 }

@@ -38,11 +38,20 @@ export function getStats(game, mode) {
 }
 
 /**
+ * Record that a game was started.
+ */
+export function startGame(game, mode) {
+  const stats = getStats(game, mode);
+  stats.played++;
+  save(game, mode, stats);
+}
+
+/**
  * Record a completed game.
+ * The played counter was already incremented by startGame().
  */
 export function recordGame(game, mode, won, time, score, moves) {
   const stats = getStats(game, mode);
-  stats.played++;
   if (won) {
     stats.won++;
     if (stats.bestTime === null || time < stats.bestTime) stats.bestTime = time;

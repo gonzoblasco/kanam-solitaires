@@ -4,6 +4,7 @@
 
 import { createKlondike } from './klondike.js';
 import { renderKlondike } from './renderer.js';
+import { startGame } from '../../lib/stats.js';
 
 let currentState = null;
 let currentContainer = null;
@@ -19,12 +20,15 @@ export function getOptions() {
   };
 }
 
+import { startGame } from '../../lib/stats.js';
+
 export function init(container, options = {}) {
   currentContainer = container;
   const drawMode = options.drawMode ?? 1;
   const scoringMode = options.scoringMode ?? 'standard';
   const variant = options.variant ?? 'standard';
   currentState = createKlondike(drawMode, scoringMode, variant);
+  startGame('klondike', `draw${drawMode}-${scoringMode}`);
   renderKlondike(container, currentState, true);
   return currentState;
 }
