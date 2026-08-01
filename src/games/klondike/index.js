@@ -15,6 +15,7 @@ export function getOptions() {
   return {
     drawMode: { type: 'select', label: 'Draw', options: [1, 3], default: 1 },
     scoringMode: { type: 'select', label: 'Score', options: ['standard', 'vegas'], default: 'standard' },
+    variant: { type: 'select', label: 'Rules', options: ['standard', 'relaxed', 'strict'], default: 'standard' },
   };
 }
 
@@ -22,7 +23,8 @@ export function init(container, options = {}) {
   currentContainer = container;
   const drawMode = options.drawMode ?? 1;
   const scoringMode = options.scoringMode ?? 'standard';
-  currentState = createKlondike(drawMode, scoringMode);
+  const variant = options.variant ?? 'standard';
+  currentState = createKlondike(drawMode, scoringMode, variant);
   renderKlondike(container, currentState, true);
   return currentState;
 }

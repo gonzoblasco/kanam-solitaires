@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { createKlondike, moveTableauRun, tableauToFoundation, undo } from './klondike.js';
+import {
+  canMoveToTableau,
+  createKlondike,
+  foundationToTableau,
+  moveTableauRun,
+  tableauToFoundation,
+  undo,
+} from './klondike.js';
 
 function makeCard(suit, rank) {
   const isRedSuit = suit === '♥' || suit === '♦';
@@ -40,18 +47,28 @@ describe('Klondike Solitaire', () => {
     expect(state.foundations[0][0].rank).toBe('A');
   });
 
-  it('allows undo to restore a move to foundation', () => {
-    const state = createKlondike(1, 'standard');
-    state.tableau = [[makeCard('♠', 'A')]];
-    state.stock = [];
-    state.waste = [];
+  it('relaxed variant allows any card on empty column', () => {
+    expect(canMoveToTableau(makeCard('♠', '5'), [], 'any')).toBe(true);
+    expect(canMoveToTableau(makeCard('♠', 'K'), [], 'kings-only')).toBe(true);
+    expect(canMoveToTableau(makeCard('♠', '5'), [], 'kings-only')).toBe(false);
+  });
 
-    tableauToFoundation(state, 0, 0);
+  it('strict variant disallows foundation-to-tableau moves', () => {
+    const state = createKlondike(1, 'standard', 'strict');
+    state.foundations = [[makeCard('♠', 'A')]];
+    state.tableau = [[]];
+    expect(foundationToTableau(state, 0, 0)).toBe(false);
     expect(state.foundations[0].length).toBe(1);
+  });
 
-    expect(undo(state)).toBe(true);
+  it('standard variant allows foundation-to-tableau moves', () => {
+    const state = createKlondike(1, 'standard', 'standard');
+    state.foundations = [[makeCard('♠', 'A')]];
+    state.tableau = [[makeCard('♥', '2')]];
+    // Move foundation A onto tableau (A onto 2 is valid, red on black)
+    expect(foundationToTableau(state, 0, 0)).toBe(true);
     expect(state.foundations[0].length).toBe(0);
-    expect(state.tableau[0].length).toBe(1);
-    expect(state.tableau[0][0].rank).toBe('A');
+    expect(state.tableau[0].length).toBe(2);
+    expect(state.tableau[0][1].rank).toBe('A');
   });
 });

@@ -238,7 +238,7 @@ export function renderKlondike(container, state, isNew = false) {
   newGameBtn.addEventListener('click', async () => {
     clearHint();
     if (state.moves === 0) {
-      const ns = createKlondike(state.drawMode, state.scoringMode);
+      const ns = createKlondike(state.drawMode, state.scoringMode, state.variant);
       renderKlondike(document.getElementById('game-container'), ns, true);
       return;
     }
@@ -249,7 +249,7 @@ export function renderKlondike(container, state, isNew = false) {
       cancelText: 'Cancel',
     });
     if (confirmed) {
-      const ns = createKlondike(state.drawMode, state.scoringMode);
+      const ns = createKlondike(state.drawMode, state.scoringMode, state.variant);
       renderKlondike(document.getElementById('game-container'), ns, true);
     }
   });

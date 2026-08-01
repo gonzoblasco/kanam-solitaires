@@ -14,7 +14,7 @@
 
 import { createDeck, isRed, rankValue, shuffle } from '../../lib/card.js';
 
-export function createKlondike(drawMode = 1, scoringMode = 'standard') {
+export function createKlondike(drawMode = 1, scoringMode = 'standard', variant = 'standard') {
   const deck = shuffle(createDeck());
 
   // Deal tableau columns (1-7 cards, only top card face up)
@@ -47,6 +47,7 @@ export function createKlondike(drawMode = 1, scoringMode = 'standard') {
     history: [],
     drawMode,
     scoringMode,
+    variant,
     startTime: null,
     elapsed: 0,
     timerRunning: false,
@@ -190,14 +191,18 @@ export function canMoveToFoundation(card, foundationPile) {
 /**
  * Can a card (or stack) be placed on a tableau column?
  */
-export function canMoveToTableau(card, column) {
+export function canMoveToTableau(card, column, emptyColumnRule = 'kings-only') {
   if (column.length === 0) {
-    return card.rank === 'K';
+    return emptyColumnRule === 'any' ? true : card.rank === 'K';
   }
   const top = column[column.length - 1];
   const cardColor = isRed(card.suit) ? 'red' : 'black';
   const topColor = isRed(top.suit) ? 'red' : 'black';
   return cardColor !== topColor && rankValue(card.rank) === rankValue(top.rank) - 1;
+}
+
+function getEmptyColumnRule(variant) {
+  return variant === 'relaxed' ? 'any' : 'kings-only';
 }
 
 /* ─── Waste moves ─── */
@@ -318,8 +323,9 @@ export function tableauToFoundation(state, colIndex, foundationIndex) {
 export function foundationToTableau(state, foundationIndex, colIndex) {
   const foundation = state.foundations[foundationIndex];
   if (foundation.length === 0) return false;
+  if (state.variant === 'strict') return false;
   const card = foundation[foundation.length - 1];
-  if (!canMoveToTableau(card, state.tableau[colIndex])) return false;
+  if (!canMoveToTableau(card, state.tableau[colIndex], getEmptyColumnRule(state.variant))) return false;
 
   pushUndo(state);
   state.tableau[colIndex].push(foundation.pop());
@@ -349,7 +355,7 @@ export function findAutoDestination(state, card, sourceType, sourceIndex, cardIn
   // 2. Try tableau columns
   for (let i = 0; i < 7; i++) {
     if (sourceType === 'tableau' && i === sourceIndex) continue;
-    if (canMoveToTableau(card, state.tableau[i])) {
+    if (canMoveToTableau(card, state.tableau[i], getEmptyColumnRule(state.variant))) {
       return { type: 'tableau', index: i };
     }
   }
@@ -396,7 +402,7 @@ export function findHint(state) {
   if (state.waste.length > 0) {
     const card = state.waste[state.waste.length - 1];
     for (let i = 0; i < 7; i++) {
-      if (canMoveToTableau(card, state.tableau[i])) {
+      if (canMoveToTableau(card, state.tableau[i], getEmptyColumnRule(state.variant))) {
         return { source: 'waste', sourceIndex: null, cardIndex: null, dest: 'tableau', destIndex: i };
       }
     }
@@ -411,7 +417,7 @@ export function findHint(state) {
       const runCard = column[runStart];
       for (let dstCol = 0; dstCol < 7; dstCol++) {
         if (dstCol === srcCol) continue;
-        if (canMoveToTableau(runCard, state.tableau[dstCol])) {
+        if (canMoveToTableau(runCard, state.tableau[dstCol], getEmptyColumnRule(state.variant))) {
           return { source: 'tableau', sourceIndex: srcCol, cardIndex: runStart, dest: 'tableau', destIndex: dstCol };
         }
       }
