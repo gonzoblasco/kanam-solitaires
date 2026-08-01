@@ -51,69 +51,51 @@
 ## Hito 6 — Pulido y personalización
 
 ### 6.0 Corregir bugs restantes (highest priority)
-- [ ] Verificar que undo no pierda cartas en ningún juego tras múltiples movimientos
-- [ ] Verificar que `__spiderState__`, `__freecellState__` se remuevan del build final
-- [ ] Revisar que los `id` de cartas no se repitan (FreeCell usaba nombres de palo + rango, únicos por mazo; Spider usa índices de copia)
+- [x] Verificar que undo no pierda cartas en ningún juego tras múltiples movimientos
+- [x] Verificar que `__spiderState__`, `__freecellState__` se remuevan del build final
+- [x] Revisar que los `id` de cartas no se repitan (FreeCell usaba nombres de palo + rango, únicos por mazo; Spider usa índices de copia)
+- [x] Timer: arrancar en creación de partida, no en primer movimiento
+- [x] Timer display: no reiniciar intervalo en cada render (evita saltos/parpadeos)
+- [x] Estadísticas: contar partida abandonada al apretar "New Game" con movimientos > 0
 
 ### 6.1 Responsive + botonera vertical (highest UI priority)
-- [ ] Rehacer botonera inferior como columna vertical flotante/derecha sin ocupar ancho del tablero
-- [ ] Ancho mínimo por columna de carta que no se solape en pantallas medianas
-- [ ] Escala proporcional de cartas según viewport (CSS clamp / scale)
-- [ ] Layout que funcione en ventanas no maximizadas (ej. 900px, 700px)
-- [ ] Tap targets mínimos 44×44 en móvil
-- [ ] Evitar solapamiento de columnas en Spider (10 cols) y FreeCell (8 cols)
+- [x] Rehacer botonera inferior como columna vertical flotante/derecha sin ocupar ancho del tablero
+- [x] Ancho mínimo por columna de carta que no se solape en pantallas medianas
+- [x] Escala proporcional de cartas según viewport (CSS clamp / scale)
+- [x] Layout que funcione en ventanas no maximizadas (ej. 900px, 700px)
+- [x] Tap targets mínimos 44×44 en móvil
+- [x] Evitar solapamiento de columnas en Spider (10 cols) y FreeCell (8 cols)
 
 ### 6.2 Personalización de reglas por juego
-**Objetivo:** permitir al usuario elegir variantes desde el header de opciones.
-
-- [ ] **Klondike:**
+- [x] **Klondike:**
   - Relaxed mode (cualquier rey en columna vacía vs solo K)
   - Strict mode (no foundation→tableau)
   - Draw 1 / Draw 3
   - Standard / Vegas scoring
-- [ ] **Spider:**
+- [x] **Spider:**
   - 1 / 2 / 4 suits
   - Mostrar contador de runs completadas (0/8)
   - Opción: permitir mover runs solo si son mismo palo (más estricta)
-- [ ] **FreeCell:**
+- [x] **FreeCell:**
   - Classic (alternar colores)
   - Baker's Game (mismo palo en tableau)
   - Supermove fórmula real: `(freeCells + 1) * 2^emptyColumns`
-- [ ] **Pyramid:**
-  - Classic (solo expuestas)
-  - Relaxed (cualquier carta visible)
-  - Scoring por tiempo restante
-**Objetivo:** permitir al usuario elegir variantes desde el header de opciones.
-
-- [ ] **Klondike:**
-  - Relaxed mode (cualquier rey en columna vacía vs solo K)
-  - Strict mode (no foundation→tableau)
-  - Draw 1 / Draw 3
-  - Standard / Vegas scoring
-- [ ] **Spider:**
-  - 1 / 2 / 4 suits
-  - Mostrar contador de runs completadas (0/8)
-  - Opción: permitir mover runs solo si son mismo palo (más estricta)
-- [ ] **FreeCell:**
-  - Classic (alternar colores)
-  - Baker's Game (mismo palo en tableau)
-  - Supermove fórmula real: `(freeCells + 1) * 2^emptyColumns`
-- [ ] **Pyramid:**
+- [x] **Pyramid:**
   - Classic (solo expuestas)
   - Relaxed (cualquier carta visible)
   - Scoring por tiempo restante
 
 ### 6.2 UI/UX refinada
-- [ ] Animaciones de movimiento consistentes entre juegos (no solo full rebuild)
-- [ ] Estado visual de selección más claro
-- [ ] Mejoras de responsive en móvil (columnas más angostas, tap targets)
-- [ ] Opción de card back selectable (al menos 2 diseños)
+- [x] Animaciones de movimiento consistentes entre juegos (no solo full rebuild)
+- [x] Estado visual de selección más claro
+- [x] Mejoras de responsive en móvil (columnas más angostas, tap targets)
+- [x] Opción de card back selectable (al menos 2 diseños)
 
 ### 6.3 Accesibilidad
-- [ ] Aria labels en cartas, columnas y botones
-- [ ] Navegación por teclado (tab + enter/espacio)
-- [ ] Focus management visible
-- [ ] Contraste de colores verificado
+- [x] Aria labels en cartas, columnas y botones
+- [x] Navegación por teclado (tab + enter/espacio)
+- [x] Focus management visible
+- [x] Contraste de colores verificado
 
 ### 6.4 Sonido
 - [ ] Volumen ajustable
@@ -121,9 +103,9 @@
 - [ ] Mantener off por default
 
 ### 6.5 Tests
-- [ ] `vitest` + `happy-dom`
-- [ ] Tests de lógica para cada juego (creación, movimientos, undo, win)
-- [ ] Pre-commit hook con `simple-git-hooks`
+- [x] `vitest` + `happy-dom`
+- [x] Tests de lógica para cada juego (creación, movimientos, undo, win)
+- [x] Pre-commit hook con `simple-git-hooks`
 
 ### 6.6 Lighthouse
 - [ ] Score ≥ 90 en Performance, Accessibility, Best Practices

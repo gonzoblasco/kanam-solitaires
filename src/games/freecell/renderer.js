@@ -7,7 +7,7 @@ import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
 import { saveGameState } from '../../lib/saveState.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
-import { getAllStats, getStats, recordGame, resetStats } from '../../lib/stats.js';
+import { getAllStats, getStats, recordGame, resetStats, startGame } from '../../lib/stats.js';
 import {
   autoComplete,
   createFreeCell,
@@ -57,7 +57,9 @@ function stopTimerDisplay() {
 
 export function renderFreeCell(container, state, isNew = false) {
   currentState = state;
-  stopTimerDisplay();
+  if (isNew) {
+    stopTimerDisplay();
+  }
   container.innerHTML = '';
   const table = document.createElement('div');
   table.className = 'freecell-tableau';
@@ -146,8 +148,13 @@ export function renderFreeCell(container, state, isNew = false) {
   newGameBtn.textContent = '♠ New Game';
   newGameBtn.addEventListener('click', async () => {
     clearHint();
+    const modeKey = state.variant ?? 'classic';
+    if (state.moves > 0 && !state.won) {
+      recordGame('freecell', modeKey, false, state.elapsed, state.score, state.moves);
+    }
     if (state.moves === 0) {
       const ns = createFreeCell(state.variant);
+      startGame('freecell', modeKey);
       renderFreeCell(document.getElementById('game-container'), ns, true);
       return;
     }
@@ -159,6 +166,7 @@ export function renderFreeCell(container, state, isNew = false) {
     });
     if (confirmed) {
       const ns = createFreeCell(state.variant);
+      startGame('freecell', modeKey);
       renderFreeCell(document.getElementById('game-container'), ns, true);
     }
   });

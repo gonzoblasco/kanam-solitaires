@@ -7,7 +7,7 @@ import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
 import { saveGameState } from '../../lib/saveState.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
-import { getAllStats, getStats, recordGame, resetStats } from '../../lib/stats.js';
+import { getAllStats, getStats, recordGame, resetStats, startGame } from '../../lib/stats.js';
 import {
   autoComplete,
   createPyramid,
@@ -56,7 +56,9 @@ function stopTimerDisplay() {
 
 export function renderPyramid(container, state, isNew = false) {
   currentState = state;
-  stopTimerDisplay();
+  if (isNew) {
+    stopTimerDisplay();
+  }
   container.innerHTML = '';
   const table = document.createElement('div');
   table.className = 'pyramid-tableau';
@@ -179,8 +181,13 @@ export function renderPyramid(container, state, isNew = false) {
   newGameBtn.textContent = '♠ New Game';
   newGameBtn.addEventListener('click', async () => {
     clearHint();
+    const modeKey = state.variant ?? 'classic';
+    if (state.moves > 0 && !state.won) {
+      recordGame('pyramid', modeKey, false, state.elapsed, state.score, state.moves);
+    }
     if (state.moves === 0) {
       const ns = createPyramid(state.variant);
+      startGame('pyramid', modeKey);
       renderPyramid(document.getElementById('game-container'), ns, true);
       return;
     }
@@ -192,6 +199,7 @@ export function renderPyramid(container, state, isNew = false) {
     });
     if (confirmed) {
       const ns = createPyramid(state.variant);
+      startGame('pyramid', modeKey);
       renderPyramid(document.getElementById('game-container'), ns, true);
     }
   });

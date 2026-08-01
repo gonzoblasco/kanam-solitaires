@@ -9,7 +9,7 @@ import { announce } from '../../lib/announcer.js';
 import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
-import { getAllStats, getStats, recordGame, resetStats } from '../../lib/stats.js';
+import { getAllStats, getStats, recordGame, resetStats, startGame } from '../../lib/stats.js';
 import {
   autoComplete,
   createKlondike,
@@ -160,7 +160,9 @@ function animateCardsSequentially(cards, callback) {
 
 export function renderKlondike(container, state, isNew = false) {
   currentState = state;
-  stopTimerDisplay();
+  if (isNew) {
+    stopTimerDisplay();
+  }
   container.innerHTML = '';
   const table = document.createElement('div');
   table.className = 'klondike-tableau';
@@ -257,8 +259,13 @@ export function renderKlondike(container, state, isNew = false) {
   newGameBtn.textContent = '♠ New Game';
   newGameBtn.addEventListener('click', async () => {
     clearHint();
+    const modeKey = `draw${state.drawMode}-${state.scoringMode}`;
+    if (state.moves > 0 && !state.won) {
+      recordGame('klondike', modeKey, false, state.elapsed, state.score, state.moves);
+    }
     if (state.moves === 0) {
       const ns = createKlondike(state.drawMode, state.scoringMode, state.variant);
+      startGame('klondike', modeKey);
       renderKlondike(document.getElementById('game-container'), ns, true);
       return;
     }
@@ -270,6 +277,7 @@ export function renderKlondike(container, state, isNew = false) {
     });
     if (confirmed) {
       const ns = createKlondike(state.drawMode, state.scoringMode, state.variant);
+      startGame('klondike', modeKey);
       renderKlondike(document.getElementById('game-container'), ns, true);
     }
   });
@@ -302,7 +310,6 @@ export function renderKlondike(container, state, isNew = false) {
 }
 
 import { saveGameState } from '../../lib/saveState.js';
-import { startGame } from '../../lib/stats.js';
 
 function rerender(state) {
   saveGameState('klondike', state);
