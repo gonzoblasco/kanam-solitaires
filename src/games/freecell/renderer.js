@@ -2,6 +2,7 @@
  * FreeCell Solitaire — renderer.
  */
 
+import { announce } from '../../lib/announcer.js';
 import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
@@ -24,6 +25,18 @@ import {
 
 let currentState = null;
 let timerInterval = null;
+const animating = false;
+
+const SUIT_NAMES = {
+  '♠': 'Spades',
+  '♥': 'Hearts',
+  '♦': 'Diamonds',
+  '♣': 'Clubs',
+};
+
+function getSuitName(suit) {
+  return SUIT_NAMES[suit] || suit;
+}
 
 function startTimerDisplay(state) {
   if (timerInterval) clearInterval(timerInterval);
@@ -51,7 +64,9 @@ export function renderFreeCell(container, state, isNew = false) {
   // Score bar
   const scoreBar = document.createElement('div');
   scoreBar.className = 'score-bar';
-  scoreBar.innerHTML = `<span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span> <span>Score: <span class="score-value">${state.score}</span></span> <span>Moves: <span class="moves-value">${state.moves}</span></span>`;
+  scoreBar.setAttribute('aria-live', 'polite');
+  scoreBar.setAttribute('aria-atomic', 'true');
+  scoreBar.innerHTML = `<span>⏱ <span id="timer-display" aria-live="off">${formatTime(state.elapsed)}</span></span> <span>Score: <span class="score-value" aria-live="off">${state.score}</span></span> <span>Moves: <span class="moves-value" aria-live="off">${state.moves}</span></span>`;
   table.appendChild(scoreBar);
 
   // Top row: free cells + foundations
@@ -60,11 +75,15 @@ export function renderFreeCell(container, state, isNew = false) {
 
   const freeCellsEl = document.createElement('div');
   freeCellsEl.className = 'freecell-cells';
+  freeCellsEl.setAttribute('role', 'group');
+  freeCellsEl.setAttribute('aria-label', 'Free cells');
   state.freeCells.forEach((_, i) => freeCellsEl.appendChild(createFreeCellElement(state, i)));
   topRow.appendChild(freeCellsEl);
 
   const foundationsEl = document.createElement('div');
   foundationsEl.className = 'freecell-foundations';
+  foundationsEl.setAttribute('role', 'group');
+  foundationsEl.setAttribute('aria-label', 'Foundation piles');
   state.foundations.forEach((_, i) => foundationsEl.appendChild(createFoundationElement(state, i)));
   topRow.appendChild(foundationsEl);
 
@@ -73,6 +92,8 @@ export function renderFreeCell(container, state, isNew = false) {
   // Columns
   const columnsEl = document.createElement('div');
   columnsEl.className = 'freecell-columns';
+  columnsEl.setAttribute('role', 'group');
+  columnsEl.setAttribute('aria-label', 'Tableau columns');
   state.tableau.forEach((_, i) => columnsEl.appendChild(createColumnElement(state, i, isNew)));
   table.appendChild(columnsEl);
   container.appendChild(table);
@@ -88,6 +109,7 @@ export function renderFreeCell(container, state, isNew = false) {
   undoBtn.addEventListener('click', () => {
     clearHint();
     undo(state);
+    announce('Undo');
     rerender(state);
   });
   bottomBar.appendChild(undoBtn);
@@ -175,10 +197,14 @@ function createFreeCellElement(state, index) {
   const el = document.createElement('div');
   el.className = 'freecell-slot';
   el.dataset.freecellIndex = index;
+  el.setAttribute('role', 'button');
+  el.setAttribute('aria-label', `Free cell ${index + 1}, ${state.freeCells[index] ? 'occupied' : 'empty'}`);
 
   const card = state.freeCells[index];
   if (card) {
-    const cardEl = createCardElement(card);
+    const cardEl = createCardElement(card, {
+      label: `${card.rank} of ${getSuitName(card.suit)}, free cell ${index + 1}`,
+    });
     cardEl.draggable = true;
     cardEl.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', `freecell-${index}`));
     cardEl.addEventListener('dblclick', () => {
@@ -217,10 +243,17 @@ function createFoundationElement(state, index) {
   const el = document.createElement('div');
   el.className = 'foundation';
   el.dataset.foundationIndex = index;
+  el.setAttribute('role', 'button');
+  const suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
+  el.setAttribute('aria-label', `Foundation ${suits[index]}, ${state.foundations[index].length} cards`);
 
   const pile = state.foundations[index];
   if (pile.length > 0) {
-    el.appendChild(createCardElement(pile[pile.length - 1]));
+    el.appendChild(
+      createCardElement(pile[pile.length - 1], {
+        label: `${pile[pile.length - 1].rank} of ${getSuitName(pile[pile.length - 1].suit)}, foundation ${suits[index]}`,
+      }),
+    );
   } else {
     const target = document.createElement('div');
     target.className = 'pile-target';
@@ -252,6 +285,8 @@ function createColumnElement(state, colIndex, isNew) {
   const el = document.createElement('div');
   el.className = 'freecell-column';
   el.dataset.columnIndex = colIndex;
+  el.setAttribute('role', 'list');
+  el.setAttribute('aria-label', `Tableau column ${colIndex + 1}, ${state.tableau[colIndex].length} cards`);
 
   const pileEl = document.createElement('div');
   pileEl.className = 'column-pile';
@@ -265,7 +300,9 @@ function createColumnElement(state, colIndex, isNew) {
     pileEl.appendChild(target);
   } else {
     column.forEach((card, cardIndex) => {
-      const cardEl = createCardElement(card);
+      const cardEl = createCardElement(card, {
+        label: `${card.rank} of ${getSuitName(card.suit)}, column ${colIndex + 1}`,
+      });
       cardEl.style.top = `${cardIndex * 20}px`;
       cardEl.style.zIndex = cardIndex;
       if (isNew) {

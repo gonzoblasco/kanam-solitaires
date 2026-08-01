@@ -2,6 +2,7 @@
  * Pyramid Solitaire — renderer.
  */
 
+import { announce } from '../../lib/announcer.js';
 import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
@@ -23,6 +24,18 @@ import {
 
 let currentState = null;
 let timerInterval = null;
+const animating = false;
+
+const SUIT_NAMES = {
+  '♠': 'Spades',
+  '♥': 'Hearts',
+  '♦': 'Diamonds',
+  '♣': 'Clubs',
+};
+
+function getSuitName(suit) {
+  return SUIT_NAMES[suit] || suit;
+}
 
 function startTimerDisplay(state) {
   if (timerInterval) clearInterval(timerInterval);
@@ -50,12 +63,16 @@ export function renderPyramid(container, state, isNew = false) {
   // Score bar
   const scoreBar = document.createElement('div');
   scoreBar.className = 'score-bar';
-  scoreBar.innerHTML = `<span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span> <span>Score: <span class="score-value">${state.score}</span></span> <span>Moves: <span class="moves-value">${state.moves}</span></span>`;
+  scoreBar.setAttribute('aria-live', 'polite');
+  scoreBar.setAttribute('aria-atomic', 'true');
+  scoreBar.innerHTML = `<span>⏱ <span id="timer-display" aria-live="off">${formatTime(state.elapsed)}</span></span> <span>Score: <span class="score-value" aria-live="off">${state.score}</span></span> <span>Moves: <span class="moves-value" aria-live="off">${state.moves}</span></span>`;
   table.appendChild(scoreBar);
 
   // Stock + Waste
   const topRow = document.createElement('div');
   topRow.className = 'pyramid-top';
+  topRow.setAttribute('role', 'group');
+  topRow.setAttribute('aria-label', 'Stock and waste piles');
   topRow.appendChild(createStockElement(state));
   topRow.appendChild(createWasteElement(state));
   table.appendChild(topRow);
@@ -63,12 +80,15 @@ export function renderPyramid(container, state, isNew = false) {
   // Pyramid
   const pyramidEl = document.createElement('div');
   pyramidEl.className = 'pyramid-grid';
+  pyramidEl.setAttribute('role', 'grid');
+  pyramidEl.setAttribute('aria-label', 'Pyramid of cards');
   state.pyramid.forEach((row, rowIdx) => {
     const rowEl = document.createElement('div');
     rowEl.className = 'pyramid-row';
     rowEl.style.zIndex = rowIdx + 1;
     row.forEach((card, colIdx) => {
-      const cardEl = createCardElement(card);
+      const label = card.faceUp ? `${card.rank} of ${getSuitName(card.suit)}, row ${rowIdx + 1}` : 'Face-down card';
+      const cardEl = createCardElement(card, { label });
       cardEl.dataset.row = rowIdx;
       cardEl.dataset.col = colIdx;
 
@@ -80,6 +100,10 @@ export function renderPyramid(container, state, isNew = false) {
 
         cardEl.addEventListener('click', () => {
           toggleSelect(state, rowIdx, colIdx);
+          const selectedCount = state.selected.length;
+          if (selectedCount > 0) {
+            announce(`${selectedCount} card${selectedCount === 1 ? '' : 's'} selected`);
+          }
           rerender(state);
         });
       }
@@ -203,6 +227,8 @@ function rerender(state) {
 function createStockElement(state) {
   const el = document.createElement('div');
   el.className = 'pyramid-stock';
+  el.setAttribute('role', 'button');
+  el.setAttribute('aria-label', `Stock pile, ${state.stock.length} cards remaining`);
   if (state.stock.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'stock-empty';
@@ -210,9 +236,10 @@ function createStockElement(state) {
     el.appendChild(empty);
   } else {
     const card = state.stock[state.stock.length - 1];
-    const cardEl = createCardElement(card);
+    const cardEl = createCardElement(card, { label: 'Stock top card, face down' });
     cardEl.addEventListener('click', () => {
       drawStock(state);
+      announce(`Drew ${state.waste.length > 0 ? 'a card' : 'a card'} to waste. ${state.stock.length} remaining.`);
       playClick();
       rerender(state);
     });
@@ -224,11 +251,17 @@ function createStockElement(state) {
 function createWasteElement(state) {
   const el = document.createElement('div');
   el.className = 'pyramid-waste';
+  el.setAttribute('role', 'region');
+  el.setAttribute('aria-label', 'Waste pile');
   if (state.waste.length > 0) {
     const card = state.waste[state.waste.length - 1];
-    const cardEl = createCardElement(card);
+    const cardEl = createCardElement(card, { label: `${card.rank} of ${getSuitName(card.suit)}, waste pile` });
     cardEl.addEventListener('click', () => {
       selectWaste(state);
+      const selectedCount = state.selected.length;
+      if (selectedCount > 0) {
+        announce(`${selectedCount} card${selectedCount === 1 ? '' : 's'} selected`);
+      }
       rerender(state);
     });
     el.appendChild(cardEl);

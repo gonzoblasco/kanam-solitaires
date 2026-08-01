@@ -2,6 +2,7 @@
  * Spider Solitaire — renderer.
  */
 
+import { announce } from '../../lib/announcer.js';
 import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
@@ -21,8 +22,20 @@ import {
 
 let currentState = null;
 let timerInterval = null;
+const animating = false;
 
-function startTimerDisplay(state) {
+const SUIT_NAMES = {
+  '♠': 'Spades',
+  '♥': 'Hearts',
+  '♦': 'Diamonds',
+  '♣': 'Clubs',
+};
+
+function getSuitName(suit) {
+  return SUIT_NAMES[suit] || suit;
+}
+
+/* ─── Timer ─── */
   if (timerInterval) clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     tickTimer(state);
@@ -48,18 +61,24 @@ export function renderSpider(container, state, isNew = false) {
   // Score bar
   const scoreBar = document.createElement('div');
   scoreBar.className = 'score-bar';
-  scoreBar.innerHTML = `<span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span> <span>Runs: <span class="runs-value">${state.completedRuns}/8</span></span> <span>Score: <span class="score-value">${state.score}</span></span> <span>Moves: <span class="moves-value">${state.moves}</span></span>`;
+  scoreBar.setAttribute('aria-live', 'polite');
+  scoreBar.setAttribute('aria-atomic', 'true');
+  scoreBar.innerHTML = `<span>⏱ <span id="timer-display" aria-live="off">${formatTime(state.elapsed)}</span></span> <span>Runs: <span class="runs-value" aria-live="off">${state.completedRuns}/8</span></span> <span>Score: <span class="score-value" aria-live="off">${state.score}</span></span> <span>Moves: <span class="moves-value" aria-live="off">${state.moves}</span></span>`;
   table.appendChild(scoreBar);
 
   // Top: stock
   const topRow = document.createElement('div');
   topRow.className = 'spider-top';
+  topRow.setAttribute('role', 'group');
+  topRow.setAttribute('aria-label', 'Stock pile');
   topRow.appendChild(createStockElement(state));
   table.appendChild(topRow);
 
   // Columns
   const columnsEl = document.createElement('div');
   columnsEl.className = 'spider-columns';
+  columnsEl.setAttribute('role', 'group');
+  columnsEl.setAttribute('aria-label', 'Tableau columns');
   state.tableau.forEach((_, i) => {
     columnsEl.appendChild(createColumnElement(state, i, isNew));
   });
@@ -77,6 +96,7 @@ export function renderSpider(container, state, isNew = false) {
   undoBtn.addEventListener('click', () => {
     clearHint();
     undo(state);
+    announce('Undo');
     rerender(state);
   });
   bottomBar.appendChild(undoBtn);
@@ -163,6 +183,7 @@ function createStockElement(state) {
     const cardEl = createCardElement(card);
     cardEl.addEventListener('click', () => {
       drawStock(state);
+      announce(`Drew ${Math.min(10, state.stock.length)} cards. ${state.stock.length} remaining.`);
       playClick();
       rerender(state);
     });
@@ -180,6 +201,8 @@ function createColumnElement(state, colIndex, isNew) {
   const el = document.createElement('div');
   el.className = 'spider-column';
   el.dataset.columnIndex = colIndex;
+  el.setAttribute('role', 'list');
+  el.setAttribute('aria-label', `Column ${colIndex + 1}, ${state.tableau[colIndex].length} cards`);
 
   const pileEl = document.createElement('div');
   pileEl.className = 'column-pile';
@@ -193,7 +216,9 @@ function createColumnElement(state, colIndex, isNew) {
     pileEl.appendChild(target);
   } else {
     column.forEach((card, cardIndex) => {
-      const cardEl = createCardElement(card);
+      const cardEl = createCardElement(card, {
+        label: card.faceUp ? `${card.rank} of ${getSuitName(card.suit)}, column ${colIndex + 1}` : 'Face-down card',
+      });
       const overlap = card.faceUp ? 20 : 8;
       cardEl.style.top = `${cardIndex * overlap}px`;
       cardEl.style.zIndex = cardIndex;
@@ -230,7 +255,10 @@ function createColumnElement(state, colIndex, isNew) {
       const cardIdx = Number.parseInt(parts[2], 10);
       if (srcCol !== colIndex) moved = moveRun(state, srcCol, cardIdx, colIndex);
     }
-    if (moved) playSlide();
+    if (moved) {
+      playSlide();
+      announce(`Moved cards to column ${colIndex + 1}`);
+    }
     rerender(state);
   });
 
