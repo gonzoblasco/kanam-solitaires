@@ -10,7 +10,7 @@
  *   - Difficulty: 1 suit (easy), 2 suits (medium), 4 suits (hard)
  */
 
-import { createDeck, shuffle, rankValue, isRed } from '../../lib/card.js';
+import { createDeck, isRed, rankValue, shuffle } from '../../lib/card.js';
 
 const SUIT_SETS = {
   1: ['♠'],
@@ -29,7 +29,14 @@ export function createSpider(difficulty = 1) {
   for (let i = 0; i < copiesPerRank; i++) {
     for (const suit of suits) {
       for (const rank of RANKS) {
-        cards.push({ suit, rank, value: rankValue(rank), color: isRed(suit) ? 'red' : 'black', faceUp: false, id: `${suit}-${rank}-${i}` });
+        cards.push({
+          suit,
+          rank,
+          value: rankValue(rank),
+          color: isRed(suit) ? 'red' : 'black',
+          faceUp: false,
+          id: `${suit}-${rank}-${i}`,
+        });
       }
     }
   }
@@ -69,8 +76,8 @@ export function createSpider(difficulty = 1) {
 
 function snapshot(state) {
   return {
-    tableau: state.tableau.map(col => col.map(c => ({ ...c }))),
-    stock: state.stock.map(c => ({ ...c })),
+    tableau: state.tableau.map((col) => col.map((c) => ({ ...c }))),
+    stock: state.stock.map((c) => ({ ...c })),
     score: state.score,
     moves: state.moves,
   };
@@ -196,24 +203,30 @@ export function checkCompleteRun(state, colIndex) {
 
   for (let start = 0; start <= column.length - 13; start++) {
     const run = column.slice(start, start + 13);
-    if (run.some(c => !c.faceUp)) continue;
+    if (run.some((c) => !c.faceUp)) continue;
 
     const suit = run[0].suit;
-    if (run.some(c => c.suit !== suit)) continue;
+    if (run.some((c) => c.suit !== suit)) continue;
 
-    const ranks = run.map(c => rankValue(c.rank));
+    const ranks = run.map((c) => rankValue(c.rank));
 
     // A→K ascending
     let ascending = true;
     for (let i = 0; i < 12; i++) {
-      if (ranks[i + 1] !== ranks[i] + 1) { ascending = false; break; }
+      if (ranks[i + 1] !== ranks[i] + 1) {
+        ascending = false;
+        break;
+      }
     }
     if (ascending && run[0].rank === 'A' && run[12].rank === 'K') {
       column.splice(start, 13);
       state.score += 100;
       if (column.length > 0) {
         const newTop = column[column.length - 1];
-        if (!newTop.faceUp) { newTop.faceUp = true; state.score += 5; }
+        if (!newTop.faceUp) {
+          newTop.faceUp = true;
+          state.score += 5;
+        }
       }
       return true;
     }
@@ -221,14 +234,20 @@ export function checkCompleteRun(state, colIndex) {
     // K→A descending
     let descending = true;
     for (let i = 0; i < 12; i++) {
-      if (ranks[i + 1] !== ranks[i] - 1) { descending = false; break; }
+      if (ranks[i + 1] !== ranks[i] - 1) {
+        descending = false;
+        break;
+      }
     }
     if (descending && run[0].rank === 'K' && run[12].rank === 'A') {
       column.splice(start, 13);
       state.score += 100;
       if (column.length > 0) {
         const newTop = column[column.length - 1];
-        if (!newTop.faceUp) { newTop.faceUp = true; state.score += 5; }
+        if (!newTop.faceUp) {
+          newTop.faceUp = true;
+          state.score += 5;
+        }
       }
       return true;
     }
@@ -308,5 +327,5 @@ export function autoComplete(state) {
 }
 
 export function isGameWon(state) {
-  return state.tableau.every(col => col.length === 0);
+  return state.tableau.every((col) => col.length === 0);
 }

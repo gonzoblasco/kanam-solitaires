@@ -3,20 +3,20 @@
  */
 
 import { createCardElement } from '../../lib/dom.js';
-import { showModal, showHelpModal } from '../../lib/modal.js';
-import { getStats, recordGame, resetStats, getAllStats } from '../../lib/stats.js';
-import { playClick, playSlide, playFoundation, playVictory } from '../../lib/sound.js';
+import { showHelpModal, showModal } from '../../lib/modal.js';
+import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
+import { getAllStats, getStats, recordGame, resetStats } from '../../lib/stats.js';
 import {
+  autoComplete,
   createSpider,
   drawStock,
-  moveRun,
   findHint,
-  undo,
-  autoComplete,
-  isGameWon,
   formatTime,
-  tickTimer,
+  isGameWon,
+  moveRun,
   stopTimer,
+  tickTimer,
+  undo,
 } from './logic.js';
 
 let currentState = null;
@@ -32,12 +32,14 @@ function startTimerDisplay(state) {
 }
 
 function stopTimerDisplay() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
 }
 
 export function renderSpider(container, state, isNew = false) {
   currentState = state;
-  window.__spiderState__ = state;
   stopTimerDisplay();
   container.innerHTML = '';
   const table = document.createElement('div');
@@ -72,13 +74,21 @@ export function renderSpider(container, state, isNew = false) {
   undoBtn.className = 'action-btn';
   undoBtn.textContent = '↩ Undo';
   undoBtn.disabled = state.history.length === 0;
-  undoBtn.addEventListener('click', () => { clearHint(); undo(state); rerender(state); });
+  undoBtn.addEventListener('click', () => {
+    clearHint();
+    undo(state);
+    rerender(state);
+  });
   bottomBar.appendChild(undoBtn);
 
   const hintBtn = document.createElement('button');
   hintBtn.className = 'action-btn';
   hintBtn.textContent = '💡 Hint';
-  hintBtn.addEventListener('click', () => { clearHint(); const h = findHint(state); if (h) showHint(h); });
+  hintBtn.addEventListener('click', () => {
+    clearHint();
+    const h = findHint(state);
+    if (h) showHint(h);
+  });
   bottomBar.appendChild(hintBtn);
 
   const statsBtn = document.createElement('button');
@@ -151,7 +161,11 @@ function createStockElement(state) {
   } else {
     const card = state.stock[state.stock.length - 1];
     const cardEl = createCardElement(card);
-    cardEl.addEventListener('click', () => { drawStock(state); playClick(); rerender(state); });
+    cardEl.addEventListener('click', () => {
+      drawStock(state);
+      playClick();
+      rerender(state);
+    });
     el.appendChild(cardEl);
     // Show count
     const count = document.createElement('span');
@@ -185,11 +199,13 @@ function createColumnElement(state, colIndex, isNew) {
       cardEl.style.zIndex = cardIndex;
       if (isNew) {
         cardEl.classList.add('dealing');
-        cardEl.style.animationDelay = `${(colIndex * 0.08 + cardIndex * 0.04)}s`;
+        cardEl.style.animationDelay = `${colIndex * 0.08 + cardIndex * 0.04}s`;
       }
       if (card.faceUp) {
         cardEl.draggable = true;
-        cardEl.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', `spider-${colIndex}-${cardIndex}`));
+        cardEl.addEventListener('dragstart', (e) =>
+          e.dataTransfer.setData('text/plain', `spider-${colIndex}-${cardIndex}`),
+        );
       }
       pileEl.appendChild(cardEl);
     });
@@ -198,7 +214,10 @@ function createColumnElement(state, colIndex, isNew) {
     pileEl.style.height = `${lastCardOffset + 112}px`;
   }
 
-  pileEl.addEventListener('dragover', (e) => { e.preventDefault(); pileEl.classList.add('drag-over'); });
+  pileEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    pileEl.classList.add('drag-over');
+  });
   pileEl.addEventListener('dragleave', () => pileEl.classList.remove('drag-over'));
   pileEl.addEventListener('drop', (e) => {
     e.preventDefault();
@@ -207,8 +226,8 @@ function createColumnElement(state, colIndex, isNew) {
     let moved = false;
     if (data.startsWith('spider-')) {
       const parts = data.split('-');
-      const srcCol = parseInt(parts[1], 10);
-      const cardIdx = parseInt(parts[2], 10);
+      const srcCol = Number.parseInt(parts[1], 10);
+      const cardIdx = Number.parseInt(parts[2], 10);
       if (srcCol !== colIndex) moved = moveRun(state, srcCol, cardIdx, colIndex);
     }
     if (moved) playSlide();
@@ -222,7 +241,9 @@ function createColumnElement(state, colIndex, isNew) {
 /* ─── Hint ─── */
 
 function clearHint() {
-  document.querySelectorAll('.hint-source, .hint-target').forEach(el => el.classList.remove('hint-source', 'hint-target'));
+  document
+    .querySelectorAll('.hint-source, .hint-target')
+    .forEach((el) => el.classList.remove('hint-source', 'hint-target'));
 }
 
 function showHint(hint) {
@@ -247,7 +268,8 @@ function showStatsPanel(state) {
   if (Object.keys(allStats).length === 0) {
     html += '<p class="stats-empty">No games played yet.</p>';
   } else {
-    html += '<table class="stats-table"><tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
+    html +=
+      '<table class="stats-table"><tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
     for (const [mode, s] of Object.entries(allStats)) {
       html += `<tr class="${mode === modeKey ? 'stats-current' : ''}"><td>${mode}</td><td>${s.played}</td><td>${s.won}</td><td>${s.bestTime ? formatTime(s.bestTime) : '—'}</td><td>${s.bestScore ?? '—'}</td></tr>`;
     }
@@ -257,11 +279,20 @@ function showStatsPanel(state) {
   showModal({ title: '📊 Statistics', message: html, confirmText: 'Close', cancelText: null });
   setTimeout(() => {
     const resetBtn = document.getElementById('stats-reset-btn');
-    if (resetBtn) resetBtn.addEventListener('click', () => {
-      showModal({ title: 'Reset Stats', message: 'Are you sure you want to reset all statistics?', confirmText: 'Reset', cancelText: 'Cancel' }).then(confirmed => {
-        if (confirmed) { resetStats('spider'); showStatsPanel(state); }
+    if (resetBtn)
+      resetBtn.addEventListener('click', () => {
+        showModal({
+          title: 'Reset Stats',
+          message: 'Are you sure you want to reset all statistics?',
+          confirmText: 'Reset',
+          cancelText: 'Cancel',
+        }).then((confirmed) => {
+          if (confirmed) {
+            resetStats('spider');
+            showStatsPanel(state);
+          }
+        });
       });
-    });
   }, 50);
 }
 

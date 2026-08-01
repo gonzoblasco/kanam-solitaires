@@ -2,12 +2,12 @@
  * Kanam's Solitaires — main entry point.
  */
 
-import { registerGame, getGames, startGame } from './lib/gameRegistry.js';
-import { isSoundEnabled, setSoundEnabled } from './lib/sound.js';
-import * as klondike from './games/klondike/index.js';
-import * as spider from './games/spider/index.js';
 import * as freecell from './games/freecell/index.js';
+import * as klondike from './games/klondike/index.js';
 import * as pyramid from './games/pyramid/index.js';
+import * as spider from './games/spider/index.js';
+import { getGames, registerGame, startGame } from './lib/gameRegistry.js';
+import { isSoundEnabled, setSoundEnabled } from './lib/sound.js';
 
 // Register games
 registerGame(klondike);
@@ -20,7 +20,7 @@ const gameNav = document.getElementById('game-nav');
 const optionsContainer = document.getElementById('game-options');
 
 let currentGameName = 'klondike';
-let currentOptions = { drawMode: 1, scoringMode: 'standard' };
+const currentOptions = { drawMode: 1, scoringMode: 'standard' };
 
 // Build nav dynamically
 const games = getGames();
@@ -30,7 +30,7 @@ games.forEach((game) => {
   btn.dataset.game = game.name;
   btn.textContent = game.label;
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.game-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.game-btn').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
     currentGameName = game.name;
     buildOptions(game);
@@ -43,25 +43,29 @@ games.forEach((game) => {
 function buildOptions(game) {
   optionsContainer.innerHTML = '';
   const opts = game.getOptions ? game.getOptions() : {};
-  const html = Object.entries(opts).map(([key, opt]) => {
-    const currentVal = currentOptions[key] ?? opt.default;
-    const buttons = opt.options.map(val => {
-      const active = val === currentVal ? ' active' : '';
-      return `<button class="mode-btn game-opt-btn${active}" data-opt="${key}" data-val="${val}">${val}</button>`;
-    }).join('');
-    return `<div class="mode-group"><span class="mode-label">${opt.label}</span>${buttons}</div>`;
-  }).join('');
+  const html = Object.entries(opts)
+    .map(([key, opt]) => {
+      const currentVal = currentOptions[key] ?? opt.default;
+      const buttons = opt.options
+        .map((val) => {
+          const active = val === currentVal ? ' active' : '';
+          return `<button class="mode-btn game-opt-btn${active}" data-opt="${key}" data-val="${val}">${val}</button>`;
+        })
+        .join('');
+      return `<div class="mode-group"><span class="mode-label">${opt.label}</span>${buttons}</div>`;
+    })
+    .join('');
   optionsContainer.innerHTML = html;
 
   // Bind option buttons
-  optionsContainer.querySelectorAll('.game-opt-btn').forEach(btn => {
+  optionsContainer.querySelectorAll('.game-opt-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.opt;
       const val = btn.dataset.val;
       // Parse numbers
-      currentOptions[key] = isNaN(val) ? val : Number(val);
+      currentOptions[key] = Number.isNaN(val) ? val : Number(val);
       // Update active state
-      btn.parentElement.querySelectorAll('.game-opt-btn').forEach(b => b.classList.remove('active'));
+      btn.parentElement.querySelectorAll('.game-opt-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       startCurrentGame();
     });

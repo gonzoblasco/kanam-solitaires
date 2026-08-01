@@ -10,13 +10,15 @@
  *   - Max cards in a move = 2^(empty free cells + 1)
  */
 
-import { createDeck, shuffle, rankValue } from '../../lib/card.js';
+import { createDeck, rankValue, shuffle } from '../../lib/card.js';
 
 export function createFreeCell() {
   const deck = shuffle(createDeck());
 
   // All cards face up
-  deck.forEach(c => c.faceUp = true);
+  deck.forEach((c) => {
+    c.faceUp = true;
+  });
 
   // Deal 8 columns
   const tableau = [];
@@ -45,9 +47,9 @@ export function createFreeCell() {
 
 function snapshot(state) {
   return {
-    tableau: state.tableau.map(col => col.map(c => ({ ...c }))),
-    freeCells: state.freeCells.map(c => c ? { ...c } : null),
-    foundations: state.foundations.map(f => f.map(c => ({ ...c }))),
+    tableau: state.tableau.map((col) => col.map((c) => ({ ...c }))),
+    freeCells: state.freeCells.map((c) => (c ? { ...c } : null)),
+    foundations: state.foundations.map((f) => f.map((c) => ({ ...c }))),
     score: state.score,
     moves: state.moves,
   };
@@ -116,8 +118,8 @@ export function canMoveToColumn(card, column) {
  * Formula: 2^(empty free cells + 1)
  */
 export function getMaxMovable(state) {
-  const emptyCells = state.freeCells.filter(c => c === null).length;
-  return Math.pow(2, emptyCells + 1);
+  const emptyCells = state.freeCells.filter((c) => c === null).length;
+  return 2 ** (emptyCells + 1);
 }
 
 /**
@@ -303,5 +305,5 @@ export function autoComplete(state) {
 }
 
 export function isGameWon(state) {
-  return state.foundations.every(f => f.length === 13);
+  return state.foundations.every((f) => f.length === 13);
 }

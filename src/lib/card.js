@@ -21,7 +21,7 @@ export const SUIT_NAMES = {
 
 export function rankValue(rank) {
   const values = { A: 1, J: 11, Q: 12, K: 13 };
-  return values[rank] ?? parseInt(rank, 10);
+  return values[rank] ?? Number.parseInt(rank, 10);
 }
 
 export function isRed(suit) {

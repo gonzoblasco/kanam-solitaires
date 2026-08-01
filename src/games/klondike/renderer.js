@@ -6,31 +6,26 @@
  */
 
 import { createCardElement } from '../../lib/dom.js';
-import { showModal, showHelpModal } from '../../lib/modal.js';
-import { getStats, recordGame, resetStats, getAllStats } from '../../lib/stats.js';
+import { showHelpModal, showModal } from '../../lib/modal.js';
+import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
+import { getAllStats, getStats, recordGame, resetStats } from '../../lib/stats.js';
 import {
-  playClick,
-  playSlide,
-  playFoundation,
-  playVictory,
-} from '../../lib/sound.js';
-import {
+  autoComplete,
   createKlondike,
   drawStock,
-  wasteToFoundation,
-  wasteToTableau,
-  moveTableauRun,
-  tableauToFoundation,
-  foundationToTableau,
-  getTableauRunStart,
   findAutoDestination,
   findHint,
-  undo,
-  autoComplete,
-  isGameWon,
   formatTime,
-  tickTimer,
+  foundationToTableau,
+  getTableauRunStart,
+  isGameWon,
+  moveTableauRun,
   stopTimer,
+  tableauToFoundation,
+  tickTimer,
+  undo,
+  wasteToFoundation,
+  wasteToTableau,
 } from './klondike.js';
 
 let currentState = null;
@@ -49,7 +44,10 @@ function startTimerDisplay(state) {
 }
 
 function stopTimerDisplay() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
 }
 
 /* ─── Animated move helper ─── */
@@ -59,7 +57,10 @@ function stopTimerDisplay() {
  * then call rerender() to sync the DOM with the new state.
  */
 function animateCard(cardEl, targetEl, callback) {
-  if (animating) { callback(); return; }
+  if (animating) {
+    callback();
+    return;
+  }
   animating = true;
 
   const cardRect = cardEl.getBoundingClientRect();
@@ -98,7 +99,10 @@ function animateCard(cardEl, targetEl, callback) {
  * Animate multiple cards sequentially (for auto-complete).
  */
 function animateCardsSequentially(cards, callback) {
-  if (animating || cards.length === 0) { callback(); return; }
+  if (animating || cards.length === 0) {
+    callback();
+    return;
+  }
   animating = true;
 
   let index = 0;
@@ -195,13 +199,21 @@ export function renderKlondike(container, state, isNew = false) {
   undoBtn.className = 'action-btn';
   undoBtn.textContent = '↩ Undo';
   undoBtn.disabled = state.history.length === 0;
-  undoBtn.addEventListener('click', () => { clearHint(); undo(state); rerender(state); });
+  undoBtn.addEventListener('click', () => {
+    clearHint();
+    undo(state);
+    rerender(state);
+  });
   bottomBar.appendChild(undoBtn);
 
   const hintBtn = document.createElement('button');
   hintBtn.className = 'action-btn';
   hintBtn.textContent = '💡 Hint';
-  hintBtn.addEventListener('click', () => { clearHint(); const h = findHint(state); if (h) showHint(h); });
+  hintBtn.addEventListener('click', () => {
+    clearHint();
+    const h = findHint(state);
+    if (h) showHint(h);
+  });
   bottomBar.appendChild(hintBtn);
 
   const autoBtn = document.createElement('button');
@@ -283,12 +295,20 @@ function createStockElement(state) {
     const empty = document.createElement('div');
     empty.className = 'stock-empty';
     empty.textContent = '↻';
-    empty.addEventListener('click', () => { drawStock(state); playClick(); rerender(state); });
+    empty.addEventListener('click', () => {
+      drawStock(state);
+      playClick();
+      rerender(state);
+    });
     el.appendChild(empty);
   } else {
     const card = state.stock[state.stock.length - 1];
     const cardEl = createCardElement(card);
-    cardEl.addEventListener('click', () => { drawStock(state); playClick(); rerender(state); });
+    cardEl.addEventListener('click', () => {
+      drawStock(state);
+      playClick();
+      rerender(state);
+    });
     el.appendChild(cardEl);
   }
   return el;
@@ -351,7 +371,10 @@ function createFoundationElement(state, index) {
     el.appendChild(target);
   }
 
-  el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+  el.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    el.classList.add('drag-over');
+  });
   el.addEventListener('dragleave', () => el.classList.remove('drag-over'));
   el.addEventListener('drop', (e) => {
     e.preventDefault();
@@ -360,10 +383,13 @@ function createFoundationElement(state, index) {
     let moved = false;
     if (data === 'waste-top') moved = wasteToFoundation(state, index);
     else if (data.startsWith('tableau-')) {
-      const colIdx = parseInt(data.split('-')[1], 10);
+      const colIdx = Number.parseInt(data.split('-')[1], 10);
       moved = tableauToFoundation(state, colIdx, index);
     }
-    if (moved) { playFoundation(); rerender(state); }
+    if (moved) {
+      playFoundation();
+      rerender(state);
+    }
   });
 
   return el;
@@ -394,18 +420,21 @@ function createColumnElement(state, colIndex, isNew) {
       cardEl.style.zIndex = cardIndex;
       if (isNew) {
         cardEl.classList.add('dealing');
-        cardEl.style.animationDelay = `${(colIndex * 0.08 + cardIndex * 0.04)}s`;
+        cardEl.style.animationDelay = `${colIndex * 0.08 + cardIndex * 0.04}s`;
       }
       if (card.faceUp) {
         cardEl.draggable = true;
-        cardEl.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', `tableau-${colIndex}-${cardIndex}`));
+        cardEl.addEventListener('dragstart', (e) =>
+          e.dataTransfer.setData('text/plain', `tableau-${colIndex}-${cardIndex}`),
+        );
         cardEl.addEventListener('dblclick', () => {
           const runStart = getTableauRunStart(state.tableau[colIndex], cardIndex);
           if (runStart === -1) return;
           const runCard = state.tableau[colIndex][runStart];
           const dest = findAutoDestination(state, runCard, 'tableau', colIndex, cardIndex);
           if (dest) {
-            if (dest.type === 'foundation' && cardIndex === column.length - 1) tableauToFoundation(state, colIndex, dest.index);
+            if (dest.type === 'foundation' && cardIndex === column.length - 1)
+              tableauToFoundation(state, colIndex, dest.index);
             else if (dest.type === 'tableau') moveTableauRun(state, colIndex, runStart, dest.index);
             rerender(state);
           }
@@ -417,7 +446,10 @@ function createColumnElement(state, colIndex, isNew) {
     pileEl.style.height = `${lastCardOffset + 112}px`;
   }
 
-  pileEl.addEventListener('dragover', (e) => { e.preventDefault(); pileEl.classList.add('drag-over'); });
+  pileEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    pileEl.classList.add('drag-over');
+  });
   pileEl.addEventListener('dragleave', () => pileEl.classList.remove('drag-over'));
   pileEl.addEventListener('drop', (e) => {
     e.preventDefault();
@@ -427,11 +459,11 @@ function createColumnElement(state, colIndex, isNew) {
     if (data === 'waste-top') moved = wasteToTableau(state, colIndex);
     else if (data.startsWith('tableau-')) {
       const parts = data.split('-');
-      const srcCol = parseInt(parts[1], 10);
-      const cardIdx = parseInt(parts[2], 10);
+      const srcCol = Number.parseInt(parts[1], 10);
+      const cardIdx = Number.parseInt(parts[2], 10);
       if (srcCol !== colIndex) moved = moveTableauRun(state, srcCol, cardIdx, colIndex);
     } else if (data.startsWith('foundation-')) {
-      const fIdx = parseInt(data.split('-')[1], 10);
+      const fIdx = Number.parseInt(data.split('-')[1], 10);
       moved = foundationToTableau(state, fIdx, colIndex);
     }
     if (moved) playSlide();
@@ -445,7 +477,9 @@ function createColumnElement(state, colIndex, isNew) {
 /* ─── Hint ─── */
 
 function clearHint() {
-  document.querySelectorAll('.hint-source, .hint-target').forEach(el => el.classList.remove('hint-source', 'hint-target'));
+  document
+    .querySelectorAll('.hint-source, .hint-target')
+    .forEach((el) => el.classList.remove('hint-source', 'hint-target'));
 }
 
 function showHint(hint) {
@@ -472,7 +506,8 @@ function showStatsPanel(state) {
   if (Object.keys(allStats).length === 0) {
     html += '<p class="stats-empty">No games played yet.</p>';
   } else {
-    html += '<table class="stats-table"><tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
+    html +=
+      '<table class="stats-table"><tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
     for (const [mode, s] of Object.entries(allStats)) {
       html += `<tr class="${mode === modeKey ? 'stats-current' : ''}"><td>${mode}</td><td>${s.played}</td><td>${s.won}</td><td>${s.bestTime ? formatTime(s.bestTime) : '—'}</td><td>${s.bestScore ?? '—'}</td></tr>`;
     }
@@ -482,11 +517,20 @@ function showStatsPanel(state) {
   showModal({ title: '📊 Statistics', message: html, confirmText: 'Close', cancelText: null });
   setTimeout(() => {
     const resetBtn = document.getElementById('stats-reset-btn');
-    if (resetBtn) resetBtn.addEventListener('click', () => {
-      showModal({ title: 'Reset Stats', message: 'Are you sure you want to reset all statistics?', confirmText: 'Reset', cancelText: 'Cancel' }).then(confirmed => {
-        if (confirmed) { resetStats('klondike'); showStatsPanel(state); }
+    if (resetBtn)
+      resetBtn.addEventListener('click', () => {
+        showModal({
+          title: 'Reset Stats',
+          message: 'Are you sure you want to reset all statistics?',
+          confirmText: 'Reset',
+          cancelText: 'Cancel',
+        }).then((confirmed) => {
+          if (confirmed) {
+            resetStats('klondike');
+            showStatsPanel(state);
+          }
+        });
       });
-    });
   }, 50);
 }
 

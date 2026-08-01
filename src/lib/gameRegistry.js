@@ -38,7 +38,7 @@ export function getGame(name) {
  * Destroys the previous game if any.
  */
 export function startGame(name, container, options = {}) {
-  if (currentGame && currentGame.destroy) {
+  if (currentGame?.destroy) {
     currentGame.destroy();
   }
   currentContainer = container;

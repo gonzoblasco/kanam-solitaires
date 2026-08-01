@@ -9,11 +9,13 @@
  *   - Stock of 24 cards, waste pile
  */
 
-import { createDeck, shuffle, rankValue } from '../../lib/card.js';
+import { createDeck, rankValue, shuffle } from '../../lib/card.js';
 
 export function createPyramid() {
   const deck = shuffle(createDeck());
-  deck.forEach(c => c.faceUp = true);
+  deck.forEach((c) => {
+    c.faceUp = true;
+  });
 
   // Build pyramid
   const pyramid = [];
@@ -27,7 +29,7 @@ export function createPyramid() {
   }
 
   // Stock = remaining cards
-  const stock = deck.slice(idx).map(c => ({ ...c, faceUp: false }));
+  const stock = deck.slice(idx).map((c) => ({ ...c, faceUp: false }));
 
   return {
     pyramid,
@@ -48,10 +50,10 @@ export function createPyramid() {
 
 function snapshot(state) {
   return {
-    pyramid: state.pyramid.map(row => row.map(c => ({ ...c }))),
-    stock: state.stock.map(c => ({ ...c })),
-    waste: state.waste.map(c => ({ ...c })),
-    selected: state.selected.map(s => ({ ...s })),
+    pyramid: state.pyramid.map((row) => row.map((c) => ({ ...c }))),
+    stock: state.stock.map((c) => ({ ...c })),
+    waste: state.waste.map((c) => ({ ...c })),
+    selected: state.selected.map((s) => ({ ...s })),
     score: state.score,
     moves: state.moves,
   };
@@ -156,14 +158,14 @@ export function toggleSelect(state, row, col) {
   if (!isExposed(state.pyramid, row, col)) return false;
 
   // Check if already selected
-  const existingIdx = state.selected.findIndex(s => s.row === row && s.col === col);
+  const existingIdx = state.selected.findIndex((s) => s.row === row && s.col === col);
   if (existingIdx !== -1) {
     state.selected.splice(existingIdx, 1);
     return true;
   }
 
   // If a waste card is already selected, try to pair
-  const wasteIdx = state.selected.findIndex(s => s.source === 'waste');
+  const wasteIdx = state.selected.findIndex((s) => s.source === 'waste');
   if (wasteIdx !== -1) {
     const wasteCard = state.waste[state.waste.length - 1];
     if (wasteCard && cardsSumTo13(card, wasteCard)) {
@@ -230,7 +232,7 @@ export function removeSelected(state) {
  */
 export function selectWaste(state) {
   if (state.waste.length === 0) return false;
-  if (state.selected.some(s => s.source === 'waste')) return false;
+  if (state.selected.some((s) => s.source === 'waste')) return false;
 
   const card = state.waste[state.waste.length - 1];
 
@@ -362,5 +364,5 @@ export function autoComplete(state) {
 }
 
 export function isGameWon(state) {
-  return state.pyramid.every(row => row.every(c => c.removed));
+  return state.pyramid.every((row) => row.every((c) => c.removed));
 }

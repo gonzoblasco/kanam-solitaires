@@ -60,8 +60,8 @@ export function resetStats(game, mode) {
     localStorage.removeItem(key(game, mode));
   } else {
     // Remove all keys for this game
-    const keys = Object.keys(localStorage).filter(k => k.startsWith(`${STORAGE_PREFIX}.${game}.`));
-    keys.forEach(k => localStorage.removeItem(k));
+    const keys = Object.keys(localStorage).filter((k) => k.startsWith(`${STORAGE_PREFIX}.${game}.`));
+    keys.forEach((k) => localStorage.removeItem(k));
   }
 }
 
@@ -73,11 +73,13 @@ export function getAllStats(game) {
   const prefix = `${STORAGE_PREFIX}.${game}.`;
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i);
-    if (k && k.startsWith(prefix)) {
+    if (k?.startsWith(prefix)) {
       const mode = k.slice(prefix.length);
       try {
         results[mode] = JSON.parse(localStorage.getItem(k));
-      } catch { /* skip */ }
+      } catch {
+        /* skip */
+      }
     }
   }
   return results;

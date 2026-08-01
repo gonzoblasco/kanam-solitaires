@@ -3,23 +3,23 @@
  */
 
 import { createCardElement } from '../../lib/dom.js';
-import { showModal, showHelpModal } from '../../lib/modal.js';
-import { getStats, recordGame, resetStats, getAllStats } from '../../lib/stats.js';
-import { playClick, playSlide, playFoundation, playVictory } from '../../lib/sound.js';
+import { showHelpModal, showModal } from '../../lib/modal.js';
+import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
+import { getAllStats, getStats, recordGame, resetStats } from '../../lib/stats.js';
 import {
+  autoComplete,
   createFreeCell,
+  findHint,
+  formatTime,
+  freeCellToFoundation,
+  isGameWon,
+  moveFromFreeCell,
   moveRun,
   moveToFreeCell,
-  moveFromFreeCell,
-  freeCellToFoundation,
-  tableauToFoundation,
-  findHint,
-  undo,
-  autoComplete,
-  isGameWon,
-  formatTime,
-  tickTimer,
   stopTimer,
+  tableauToFoundation,
+  tickTimer,
+  undo,
 } from './logic.js';
 
 let currentState = null;
@@ -35,12 +35,14 @@ function startTimerDisplay(state) {
 }
 
 function stopTimerDisplay() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
 }
 
 export function renderFreeCell(container, state, isNew = false) {
   currentState = state;
-  window.__freecellState__ = state;
   stopTimerDisplay();
   container.innerHTML = '';
   const table = document.createElement('div');
@@ -83,19 +85,31 @@ export function renderFreeCell(container, state, isNew = false) {
   undoBtn.className = 'action-btn';
   undoBtn.textContent = '↩ Undo';
   undoBtn.disabled = state.history.length === 0;
-  undoBtn.addEventListener('click', () => { clearHint(); undo(state); rerender(state); });
+  undoBtn.addEventListener('click', () => {
+    clearHint();
+    undo(state);
+    rerender(state);
+  });
   bottomBar.appendChild(undoBtn);
 
   const hintBtn = document.createElement('button');
   hintBtn.className = 'action-btn';
   hintBtn.textContent = '💡 Hint';
-  hintBtn.addEventListener('click', () => { clearHint(); const h = findHint(state); if (h) showHint(h); });
+  hintBtn.addEventListener('click', () => {
+    clearHint();
+    const h = findHint(state);
+    if (h) showHint(h);
+  });
   bottomBar.appendChild(hintBtn);
 
   const autoBtn = document.createElement('button');
   autoBtn.className = 'action-btn';
   autoBtn.textContent = '✨ Auto';
-  autoBtn.addEventListener('click', () => { clearHint(); const m = autoComplete(state); if (m > 0) rerender(state); });
+  autoBtn.addEventListener('click', () => {
+    clearHint();
+    const m = autoComplete(state);
+    if (m > 0) rerender(state);
+  });
   bottomBar.appendChild(autoBtn);
 
   const statsBtn = document.createElement('button');
@@ -109,9 +123,21 @@ export function renderFreeCell(container, state, isNew = false) {
   newGameBtn.textContent = '♠ New Game';
   newGameBtn.addEventListener('click', async () => {
     clearHint();
-    if (state.moves === 0) { const ns = createFreeCell(); renderFreeCell(document.getElementById('game-container'), ns, true); return; }
-    const confirmed = await showModal({ title: 'New Game', message: 'Start a new game? Current progress will be lost.', confirmText: 'New Game', cancelText: 'Cancel' });
-    if (confirmed) { const ns = createFreeCell(); renderFreeCell(document.getElementById('game-container'), ns, true); }
+    if (state.moves === 0) {
+      const ns = createFreeCell();
+      renderFreeCell(document.getElementById('game-container'), ns, true);
+      return;
+    }
+    const confirmed = await showModal({
+      title: 'New Game',
+      message: 'Start a new game? Current progress will be lost.',
+      confirmText: 'New Game',
+      cancelText: 'Cancel',
+    });
+    if (confirmed) {
+      const ns = createFreeCell();
+      renderFreeCell(document.getElementById('game-container'), ns, true);
+    }
   });
   bottomBar.appendChild(newGameBtn);
 
@@ -125,7 +151,8 @@ export function renderFreeCell(container, state, isNew = false) {
 
   // Win
   if (isGameWon(state)) {
-    stopTimer(state); stopTimerDisplay();
+    stopTimer(state);
+    stopTimerDisplay();
     const modeKey = 'freecell';
     recordGame('freecell', modeKey, true, state.elapsed, state.score, state.moves);
     const stats = getStats('freecell', modeKey);
@@ -133,13 +160,16 @@ export function renderFreeCell(container, state, isNew = false) {
     wb.className = 'win-banner';
     wb.innerHTML = `🎉 You Win! 🎉<small>Time: ${formatTime(state.elapsed)} · Score: ${state.score} · Moves: ${state.moves}<br>Best: ${formatTime(stats.bestTime || 0)} / ${stats.bestScore || 0} pts (${stats.won}/${stats.played} won)</small>`;
     container.appendChild(wb);
-    spawnConfetti(); playVictory();
+    spawnConfetti();
+    playVictory();
   }
 
   startTimerDisplay(state);
 }
 
-function rerender(state) { renderFreeCell(document.getElementById('game-container'), state, false); }
+function rerender(state) {
+  renderFreeCell(document.getElementById('game-container'), state, false);
+}
 
 function createFreeCellElement(state, index) {
   const el = document.createElement('div');
@@ -153,7 +183,10 @@ function createFreeCellElement(state, index) {
     cardEl.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', `freecell-${index}`));
     cardEl.addEventListener('dblclick', () => {
       for (let i = 0; i < 4; i++) {
-        if (freeCellToFoundation(state, index, i)) { rerender(state); return; }
+        if (freeCellToFoundation(state, index, i)) {
+          rerender(state);
+          return;
+        }
       }
     });
     el.appendChild(cardEl);
@@ -171,7 +204,7 @@ function createFreeCellElement(state, index) {
     e.preventDefault();
     const data = e.dataTransfer.getData('text/plain');
     if (data.startsWith('tableau-')) {
-      const colIdx = parseInt(data.split('-')[1], 10);
+      const colIdx = Number.parseInt(data.split('-')[1], 10);
       moveToFreeCell(state, colIdx);
       rerender(state);
     }
@@ -202,10 +235,10 @@ function createFoundationElement(state, index) {
     const data = e.dataTransfer.getData('text/plain');
     let moved = false;
     if (data.startsWith('tableau-')) {
-      const colIdx = parseInt(data.split('-')[1], 10);
+      const colIdx = Number.parseInt(data.split('-')[1], 10);
       moved = tableauToFoundation(state, colIdx, index);
     } else if (data.startsWith('freecell-')) {
-      const cellIdx = parseInt(data.split('-')[1], 10);
+      const cellIdx = Number.parseInt(data.split('-')[1], 10);
       moved = freeCellToFoundation(state, cellIdx, index);
     }
     if (moved) playFoundation();
@@ -237,13 +270,18 @@ function createColumnElement(state, colIndex, isNew) {
       cardEl.style.zIndex = cardIndex;
       if (isNew) {
         cardEl.classList.add('dealing');
-        cardEl.style.animationDelay = `${(colIndex * 0.08 + cardIndex * 0.04)}s`;
+        cardEl.style.animationDelay = `${colIndex * 0.08 + cardIndex * 0.04}s`;
       }
       cardEl.draggable = true;
-      cardEl.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', `tableau-${colIndex}-${cardIndex}`));
+      cardEl.addEventListener('dragstart', (e) =>
+        e.dataTransfer.setData('text/plain', `tableau-${colIndex}-${cardIndex}`),
+      );
       cardEl.addEventListener('dblclick', () => {
         for (let i = 0; i < 4; i++) {
-          if (tableauToFoundation(state, colIndex, i)) { rerender(state); return; }
+          if (tableauToFoundation(state, colIndex, i)) {
+            rerender(state);
+            return;
+          }
         }
       });
       pileEl.appendChild(cardEl);
@@ -258,11 +296,11 @@ function createColumnElement(state, colIndex, isNew) {
     let moved = false;
     if (data.startsWith('tableau-')) {
       const parts = data.split('-');
-      const srcCol = parseInt(parts[1], 10);
-      const cardIdx = parseInt(parts[2], 10);
+      const srcCol = Number.parseInt(parts[1], 10);
+      const cardIdx = Number.parseInt(parts[2], 10);
       if (srcCol !== colIndex) moved = moveRun(state, srcCol, cardIdx, colIndex);
     } else if (data.startsWith('freecell-')) {
-      const cellIdx = parseInt(data.split('-')[1], 10);
+      const cellIdx = Number.parseInt(data.split('-')[1], 10);
       moved = moveFromFreeCell(state, cellIdx, colIndex);
     }
     if (moved) playSlide();
@@ -276,7 +314,9 @@ function createColumnElement(state, colIndex, isNew) {
 /* ─── Hint ─── */
 
 function clearHint() {
-  document.querySelectorAll('.hint-source, .hint-target').forEach(el => el.classList.remove('hint-source', 'hint-target'));
+  document
+    .querySelectorAll('.hint-source, .hint-target')
+    .forEach((el) => el.classList.remove('hint-source', 'hint-target'));
 }
 
 function showHint(hint) {
@@ -302,7 +342,8 @@ function showStatsPanel(state) {
   let html = '<div class="stats-content">';
   if (Object.keys(allStats).length === 0) html += '<p class="stats-empty">No games played yet.</p>';
   else {
-    html += '<table class="stats-table"><tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
+    html +=
+      '<table class="stats-table"><tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
     for (const [mode, s] of Object.entries(allStats)) {
       html += `<tr><td>${mode}</td><td>${s.played}</td><td>${s.won}</td><td>${s.bestTime ? formatTime(s.bestTime) : '—'}</td><td>${s.bestScore ?? '—'}</td></tr>`;
     }
@@ -312,7 +353,14 @@ function showStatsPanel(state) {
   showModal({ title: '📊 Statistics', message: html, confirmText: 'Close', cancelText: null });
   setTimeout(() => {
     document.getElementById('stats-reset-btn')?.addEventListener('click', () => {
-      showModal({ title: 'Reset Stats', message: 'Are you sure?', confirmText: 'Reset', cancelText: 'Cancel' }).then(c => { if (c) { resetStats('freecell'); showStatsPanel(state); } });
+      showModal({ title: 'Reset Stats', message: 'Are you sure?', confirmText: 'Reset', cancelText: 'Cancel' }).then(
+        (c) => {
+          if (c) {
+            resetStats('freecell');
+            showStatsPanel(state);
+          }
+        },
+      );
     });
   }, 50);
 }

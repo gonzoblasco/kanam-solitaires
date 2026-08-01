@@ -12,7 +12,7 @@
  *   - Undo support via history stack
  */
 
-import { createDeck, shuffle, rankValue, isRed } from '../../lib/card.js';
+import { createDeck, isRed, rankValue, shuffle } from '../../lib/card.js';
 
 export function createKlondike(drawMode = 1, scoringMode = 'standard') {
   const deck = shuffle(createDeck());
@@ -31,7 +31,7 @@ export function createKlondike(drawMode = 1, scoringMode = 'standard') {
   }
 
   // Remaining cards go to stock
-  const stock = deck.slice(cardIndex).map(c => ({ ...c, faceUp: false }));
+  const stock = deck.slice(cardIndex).map((c) => ({ ...c, faceUp: false }));
   const waste = [];
   const foundations = [[], [], [], []];
 
@@ -58,10 +58,10 @@ export function createKlondike(drawMode = 1, scoringMode = 'standard') {
 
 function snapshot(state) {
   return {
-    stock: state.stock.map(c => ({ ...c })),
-    waste: state.waste.map(c => ({ ...c })),
-    foundations: state.foundations.map(f => f.map(c => ({ ...c }))),
-    tableau: state.tableau.map(col => col.map(c => ({ ...c }))),
+    stock: state.stock.map((c) => ({ ...c })),
+    waste: state.waste.map((c) => ({ ...c })),
+    foundations: state.foundations.map((f) => f.map((c) => ({ ...c }))),
+    tableau: state.tableau.map((col) => col.map((c) => ({ ...c }))),
     score: state.score,
     moves: state.moves,
   };
@@ -490,5 +490,5 @@ export function autoComplete(state) {
 /* ─── Win ─── */
 
 export function isGameWon(state) {
-  return state.foundations.every(f => f.length === 13);
+  return state.foundations.every((f) => f.length === 13);
 }

@@ -3,22 +3,22 @@
  */
 
 import { createCardElement } from '../../lib/dom.js';
-import { showModal, showHelpModal } from '../../lib/modal.js';
-import { getStats, recordGame, resetStats, getAllStats } from '../../lib/stats.js';
-import { playClick, playSlide, playFoundation, playVictory } from '../../lib/sound.js';
+import { showHelpModal, showModal } from '../../lib/modal.js';
+import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
+import { getAllStats, getStats, recordGame, resetStats } from '../../lib/stats.js';
 import {
+  autoComplete,
   createPyramid,
   drawStock,
-  toggleSelect,
+  findHint,
+  formatTime,
+  isGameWon,
   removeSelected,
   selectWaste,
-  findHint,
-  undo,
-  autoComplete,
-  isGameWon,
-  formatTime,
-  tickTimer,
   stopTimer,
+  tickTimer,
+  toggleSelect,
+  undo,
 } from './logic.js';
 
 let currentState = null;
@@ -34,7 +34,10 @@ function startTimerDisplay(state) {
 }
 
 function stopTimerDisplay() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
 }
 
 export function renderPyramid(container, state, isNew = false) {
@@ -72,7 +75,7 @@ export function renderPyramid(container, state, isNew = false) {
       if (card.removed) {
         cardEl.classList.add('card-removed');
       } else {
-        const isSelected = state.selected.some(s => s.row === rowIdx && s.col === colIdx);
+        const isSelected = state.selected.some((s) => s.row === rowIdx && s.col === colIdx);
         if (isSelected) cardEl.classList.add('selected');
 
         cardEl.addEventListener('click', () => {
@@ -111,19 +114,31 @@ export function renderPyramid(container, state, isNew = false) {
   undoBtn.className = 'action-btn';
   undoBtn.textContent = '↩ Undo';
   undoBtn.disabled = state.history.length === 0;
-  undoBtn.addEventListener('click', () => { clearHint(); undo(state); rerender(state); });
+  undoBtn.addEventListener('click', () => {
+    clearHint();
+    undo(state);
+    rerender(state);
+  });
   bottomBar.appendChild(undoBtn);
 
   const hintBtn = document.createElement('button');
   hintBtn.className = 'action-btn';
   hintBtn.textContent = '💡 Hint';
-  hintBtn.addEventListener('click', () => { clearHint(); const h = findHint(state); if (h) showHint(h); });
+  hintBtn.addEventListener('click', () => {
+    clearHint();
+    const h = findHint(state);
+    if (h) showHint(h);
+  });
   bottomBar.appendChild(hintBtn);
 
   const autoBtn = document.createElement('button');
   autoBtn.className = 'action-btn';
   autoBtn.textContent = '✨ Auto';
-  autoBtn.addEventListener('click', () => { clearHint(); const m = autoComplete(state); if (m > 0) rerender(state); });
+  autoBtn.addEventListener('click', () => {
+    clearHint();
+    const m = autoComplete(state);
+    if (m > 0) rerender(state);
+  });
   bottomBar.appendChild(autoBtn);
 
   const statsBtn = document.createElement('button');
@@ -137,9 +152,21 @@ export function renderPyramid(container, state, isNew = false) {
   newGameBtn.textContent = '♠ New Game';
   newGameBtn.addEventListener('click', async () => {
     clearHint();
-    if (state.moves === 0) { const ns = createPyramid(); renderPyramid(document.getElementById('game-container'), ns, true); return; }
-    const confirmed = await showModal({ title: 'New Game', message: 'Start a new game? Current progress will be lost.', confirmText: 'New Game', cancelText: 'Cancel' });
-    if (confirmed) { const ns = createPyramid(); renderPyramid(document.getElementById('game-container'), ns, true); }
+    if (state.moves === 0) {
+      const ns = createPyramid();
+      renderPyramid(document.getElementById('game-container'), ns, true);
+      return;
+    }
+    const confirmed = await showModal({
+      title: 'New Game',
+      message: 'Start a new game? Current progress will be lost.',
+      confirmText: 'New Game',
+      cancelText: 'Cancel',
+    });
+    if (confirmed) {
+      const ns = createPyramid();
+      renderPyramid(document.getElementById('game-container'), ns, true);
+    }
   });
   bottomBar.appendChild(newGameBtn);
 
@@ -153,7 +180,8 @@ export function renderPyramid(container, state, isNew = false) {
 
   // Win
   if (isGameWon(state)) {
-    stopTimer(state); stopTimerDisplay();
+    stopTimer(state);
+    stopTimerDisplay();
     const modeKey = 'pyramid';
     recordGame('pyramid', modeKey, true, state.elapsed, state.score, state.moves);
     const stats = getStats('pyramid', modeKey);
@@ -161,13 +189,16 @@ export function renderPyramid(container, state, isNew = false) {
     wb.className = 'win-banner';
     wb.innerHTML = `🎉 You Win! 🎉<small>Time: ${formatTime(state.elapsed)} · Score: ${state.score} · Moves: ${state.moves}<br>Best: ${formatTime(stats.bestTime || 0)} / ${stats.bestScore || 0} pts (${stats.won}/${stats.played} won)</small>`;
     container.appendChild(wb);
-    spawnConfetti(); playVictory();
+    spawnConfetti();
+    playVictory();
   }
 
   startTimerDisplay(state);
 }
 
-function rerender(state) { renderPyramid(document.getElementById('game-container'), state, false); }
+function rerender(state) {
+  renderPyramid(document.getElementById('game-container'), state, false);
+}
 
 function createStockElement(state) {
   const el = document.createElement('div');
@@ -180,7 +211,11 @@ function createStockElement(state) {
   } else {
     const card = state.stock[state.stock.length - 1];
     const cardEl = createCardElement(card);
-    cardEl.addEventListener('click', () => { drawStock(state); playClick(); rerender(state); });
+    cardEl.addEventListener('click', () => {
+      drawStock(state);
+      playClick();
+      rerender(state);
+    });
     el.appendChild(cardEl);
   }
   return el;
@@ -208,24 +243,28 @@ function createWasteElement(state) {
 /* ─── Hint ─── */
 
 function clearHint() {
-  document.querySelectorAll('.hint-source, .hint-target').forEach(el => el.classList.remove('hint-source', 'hint-target'));
+  document
+    .querySelectorAll('.hint-source, .hint-target')
+    .forEach((el) => el.classList.remove('hint-source', 'hint-target'));
 }
 
 function showHint(hint) {
   if (hint.type === 'pyramid-pair') {
     const cards = document.querySelectorAll('.pyramid-grid .card');
-    cards.forEach(el => {
-      const row = parseInt(el.dataset.row);
-      const col = parseInt(el.dataset.col);
-      if ((row === hint.cards[0].row && col === hint.cards[0].col) ||
-          (row === hint.cards[1].row && col === hint.cards[1].col)) {
+    cards.forEach((el) => {
+      const row = Number.parseInt(el.dataset.row);
+      const col = Number.parseInt(el.dataset.col);
+      if (
+        (row === hint.cards[0].row && col === hint.cards[0].col) ||
+        (row === hint.cards[1].row && col === hint.cards[1].col)
+      ) {
         el.classList.add('hint-source');
       }
     });
   } else if (hint.type === 'pyramid-king') {
     const cards = document.querySelectorAll('.pyramid-grid .card');
-    cards.forEach(el => {
-      if (parseInt(el.dataset.row) === hint.card.row && parseInt(el.dataset.col) === hint.card.col) {
+    cards.forEach((el) => {
+      if (Number.parseInt(el.dataset.row) === hint.card.row && Number.parseInt(el.dataset.col) === hint.card.col) {
         el.classList.add('hint-source');
       }
     });
@@ -236,8 +275,11 @@ function showHint(hint) {
     const wasteEl = document.querySelector('.pyramid-waste .card');
     if (wasteEl) wasteEl.classList.add('hint-source');
     const cards = document.querySelectorAll('.pyramid-grid .card');
-    cards.forEach(el => {
-      if (parseInt(el.dataset.row) === hint.pyramidCard.row && parseInt(el.dataset.col) === hint.pyramidCard.col) {
+    cards.forEach((el) => {
+      if (
+        Number.parseInt(el.dataset.row) === hint.pyramidCard.row &&
+        Number.parseInt(el.dataset.col) === hint.pyramidCard.col
+      ) {
         el.classList.add('hint-target');
       }
     });
@@ -252,7 +294,8 @@ function showStatsPanel(state) {
   let html = '<div class="stats-content">';
   if (Object.keys(allStats).length === 0) html += '<p class="stats-empty">No games played yet.</p>';
   else {
-    html += '<table class="stats-table"><tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
+    html +=
+      '<table class="stats-table"><tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
     for (const [mode, s] of Object.entries(allStats)) {
       html += `<tr><td>${mode}</td><td>${s.played}</td><td>${s.won}</td><td>${s.bestTime ? formatTime(s.bestTime) : '—'}</td><td>${s.bestScore ?? '—'}</td></tr>`;
     }
@@ -262,7 +305,14 @@ function showStatsPanel(state) {
   showModal({ title: '📊 Statistics', message: html, confirmText: 'Close', cancelText: null });
   setTimeout(() => {
     document.getElementById('stats-reset-btn')?.addEventListener('click', () => {
-      showModal({ title: 'Reset Stats', message: 'Are you sure?', confirmText: 'Reset', cancelText: 'Cancel' }).then(c => { if (c) { resetStats('pyramid'); showStatsPanel(state); } });
+      showModal({ title: 'Reset Stats', message: 'Are you sure?', confirmText: 'Reset', cancelText: 'Cancel' }).then(
+        (c) => {
+          if (c) {
+            resetStats('pyramid');
+            showStatsPanel(state);
+          }
+        },
+      );
     });
   }, 50);
 }

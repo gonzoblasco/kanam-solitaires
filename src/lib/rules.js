@@ -52,7 +52,7 @@ export const GAME_RULES = {
     ],
     variants: [
       '<strong>Classic:</strong> alternate colors in tableau.',
-      '<strong>Baker\'s Game:</strong> build tableau by suit instead of alternate color.',
+      "<strong>Baker's Game:</strong> build tableau by suit instead of alternate color.",
     ],
   },
   pyramid: {
