@@ -734,6 +734,24 @@ body {
   color: var(--color-gold-light);
 }
 
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-gold);
+  color: var(--color-bg);
+  padding: 8px 16px;
+  text-decoration: none;
+  font-weight: 600;
+  z-index: 10000;
+  border-radius: 0 0 6px 0;
+  transition: top 0.15s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 .card:focus-visible,
 .action-btn:focus-visible,
 .game-btn:focus-visible,
@@ -747,6 +765,16 @@ body {
 .card:focus-visible {
   transform: translateY(-4px);
   box-shadow: 0 0 0 3px var(--color-gold-light);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ─── Modal ─── */

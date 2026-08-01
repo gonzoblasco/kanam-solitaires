@@ -5,6 +5,7 @@
  * On moves: animate the card(s) with CSS transition, then sync DOM.
  */
 
+import { announce } from '../../lib/announcer.js';
 import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
@@ -31,6 +32,17 @@ import {
 let currentState = null;
 let timerInterval = null;
 let animating = false;
+
+const SUIT_NAMES = {
+  '♠': 'Spades',
+  '♥': 'Hearts',
+  '♦': 'Diamonds',
+  '♣': 'Clubs',
+};
+
+function getSuitName(suit) {
+  return SUIT_NAMES[suit] || suit;
+}
 
 /* ─── Timer ─── */
 
@@ -157,10 +169,12 @@ export function renderKlondike(container, state, isNew = false) {
   const scoreBar = document.createElement('div');
   scoreBar.className = 'score-bar';
   const scoringLabel = state.scoringMode === 'vegas' ? 'Vegas' : 'Score';
+  scoreBar.setAttribute('aria-live', 'polite');
+  scoreBar.setAttribute('aria-atomic', 'true');
   scoreBar.innerHTML = `
-    <span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span>
-    <span>${scoringLabel}: <span class="score-value">${state.score}</span></span>
-    <span>Moves: <span class="moves-value">${state.moves}</span></span>
+    <span>⏱ <span id="timer-display" aria-live="off">${formatTime(state.elapsed)}</span></span>
+    <span>${scoringLabel}: <span class="score-value" aria-live="off">${state.score}</span></span>
+    <span>Moves: <span class="moves-value" aria-live="off">${state.moves}</span></span>
   `;
   table.appendChild(scoreBar);
 
@@ -170,12 +184,16 @@ export function renderKlondike(container, state, isNew = false) {
 
   const stockArea = document.createElement('div');
   stockArea.className = 'klondike-stock-area';
+  stockArea.setAttribute('role', 'group');
+  stockArea.setAttribute('aria-label', 'Stock and waste piles');
   stockArea.appendChild(createStockElement(state));
   stockArea.appendChild(createWasteElement(state));
   topRow.appendChild(stockArea);
 
   const foundationsEl = document.createElement('div');
   foundationsEl.className = 'klondike-foundations';
+  foundationsEl.setAttribute('role', 'group');
+  foundationsEl.setAttribute('aria-label', 'Foundation piles');
   state.foundations.forEach((_, i) => {
     foundationsEl.appendChild(createFoundationElement(state, i));
   });
@@ -185,6 +203,8 @@ export function renderKlondike(container, state, isNew = false) {
   // Tableau columns
   const columnsEl = document.createElement('div');
   columnsEl.className = 'klondike-columns';
+  columnsEl.setAttribute('role', 'group');
+  columnsEl.setAttribute('aria-label', 'Tableau columns');
   state.tableau.forEach((_, i) => {
     columnsEl.appendChild(createColumnElement(state, i, isNew));
   });
@@ -291,6 +311,8 @@ function createStockElement(state) {
   const el = document.createElement('div');
   el.className = 'stock-pile';
   el.dataset.pile = 'stock';
+  el.setAttribute('role', 'button');
+  el.setAttribute('aria-label', `Stock pile, ${state.stock.length} cards remaining`);
   if (state.stock.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'stock-empty';
@@ -303,7 +325,7 @@ function createStockElement(state) {
     el.appendChild(empty);
   } else {
     const card = state.stock[state.stock.length - 1];
-    const cardEl = createCardElement(card);
+    const cardEl = createCardElement(card, { label: 'Face-down card, stock pile' });
     cardEl.addEventListener('click', () => {
       drawStock(state);
       playClick();
@@ -320,12 +342,14 @@ function createWasteElement(state) {
   const el = document.createElement('div');
   el.className = 'waste-pile';
   el.dataset.pile = 'waste';
+  el.setAttribute('role', 'region');
+  el.setAttribute('aria-label', 'Waste pile');
   if (state.waste.length > 0) {
     const visibleCount = Math.min(state.waste.length, 3);
     const startIdx = state.waste.length - visibleCount;
     for (let i = startIdx; i < state.waste.length; i++) {
       const card = state.waste[i];
-      const cardEl = createCardElement(card);
+      const cardEl = createCardElement(card, { label: `${card.rank} of ${getSuitName(card.suit)}, waste pile` });
       cardEl.style.left = `${(i - startIdx) * 12}px`;
       cardEl.style.zIndex = i;
       if (i === state.waste.length - 1) {
@@ -357,11 +381,16 @@ function createFoundationElement(state, index) {
   el.className = 'foundation';
   el.dataset.pile = 'foundation';
   el.dataset.foundationIndex = index;
+  el.setAttribute('role', 'button');
+  const suits = ['Spades', 'Hearts', 'Diamonds', 'Clubs'];
+  el.setAttribute('aria-label', `Foundation ${suits[index]}, ${state.foundations[index].length} cards`);
 
   const pile = state.foundations[index];
   if (pile.length > 0) {
     const card = pile[pile.length - 1];
-    const cardEl = createCardElement(card);
+    const cardEl = createCardElement(card, {
+      label: `${card.rank} of ${getSuitName(card.suit)}, foundation ${getSuitName(card.suit)}`,
+    });
     cardEl.draggable = true;
     cardEl.addEventListener('dragstart', (e) => e.dataTransfer.setData('text/plain', `foundation-${index}`));
     el.appendChild(cardEl);
@@ -402,6 +431,8 @@ function createColumnElement(state, colIndex, isNew) {
   el.className = 'klondike-column';
   el.dataset.pile = 'column';
   el.dataset.columnIndex = colIndex;
+  el.setAttribute('role', 'list');
+  el.setAttribute('aria-label', `Tableau column ${colIndex + 1}, ${state.tableau[colIndex].length} cards`);
 
   const pileEl = document.createElement('div');
   pileEl.className = 'column-pile';
@@ -415,7 +446,9 @@ function createColumnElement(state, colIndex, isNew) {
     pileEl.appendChild(target);
   } else {
     column.forEach((card, cardIndex) => {
-      const cardEl = createCardElement(card);
+      const cardEl = createCardElement(card, {
+        label: `${card.rank} of ${getSuitName(card.suit)}, column ${colIndex + 1}`,
+      });
       cardEl.style.top = `${cardIndex * 24}px`;
       cardEl.style.zIndex = cardIndex;
       if (isNew) {

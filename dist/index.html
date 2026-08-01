@@ -6,11 +6,12 @@
   <meta name="description" content="A polished collection of solitaire card games: Klondike, Spider, FreeCell, and Pyramid." />
   <meta name="theme-color" content="#1a3a2a" />
   <title>Kanam's Solitaires</title>
-  <script type="module" crossorigin src="./assets/index-MGyda1f5.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-vBW7_DgF.css">
+  <script type="module" crossorigin src="./assets/index-CJKjnHsI.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-B8HxI3Ea.css">
 </head>
 <body>
   <div id="app">
+    <a href="#game-container" class="skip-link">Skip to game</a>
     <header class="app-header">
       <div class="header-left">
         <h1 class="app-title">♠ Kanam's Solitaires ♥</h1>
@@ -21,7 +22,8 @@
         <button class="sound-toggle" id="sound-toggle" title="Toggle sound">🔇</button>
       </div>
     </header>
-    <main id="game-container"></main>
+    <main id="game-container" aria-label="Game board"></main>
+    <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   </div>
 </body>
 </html>

@@ -10,6 +10,7 @@
 </head>
 <body>
   <div id="app">
+    <a href="#game-container" class="skip-link">Skip to game</a>
     <header class="app-header">
       <div class="header-left">
         <h1 class="app-title">♠ Kanam's Solitaires ♥</h1>
@@ -20,7 +21,8 @@
         <button class="sound-toggle" id="sound-toggle" title="Toggle sound">🔇</button>
       </div>
     </header>
-    <main id="game-container"></main>
+    <main id="game-container" aria-label="Game board"></main>
+    <div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   </div>
   <script type="module" src="/src/main.js"></script>
 </body>
