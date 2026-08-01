@@ -78,13 +78,34 @@ function startCurrentGame() {
 
 // Sound toggle
 const soundToggle = document.getElementById('sound-toggle');
+if (soundToggle) {
+  soundToggle.setAttribute('aria-label', 'Toggle sound');
+  soundToggle.setAttribute('aria-pressed', String(isSoundEnabled()));
+}
 function updateSoundToggle() {
-  soundToggle.textContent = isSoundEnabled() ? '🔊' : '🔇';
+  const enabled = isSoundEnabled();
+  soundToggle.textContent = enabled ? '🔊' : '🔇';
+  soundToggle.setAttribute('aria-pressed', String(enabled));
 }
 updateSoundToggle();
 soundToggle.addEventListener('click', () => {
   setSoundEnabled(!isSoundEnabled());
   updateSoundToggle();
+});
+
+// Keyboard: activate focused cards/buttons with Enter/Space
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const active = document.activeElement;
+  if (
+    active &&
+    (active.classList.contains('card') ||
+      active.classList.contains('mode-btn') ||
+      active.classList.contains('game-btn'))
+  ) {
+    e.preventDefault();
+    active.click();
+  }
 });
 
 // Start
