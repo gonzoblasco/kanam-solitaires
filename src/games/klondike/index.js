@@ -20,8 +20,6 @@ export function getOptions() {
   };
 }
 
-import { startGame } from '../../lib/stats.js';
-
 export function init(container, options = {}) {
   currentContainer = container;
   const drawMode = options.drawMode ?? 1;
