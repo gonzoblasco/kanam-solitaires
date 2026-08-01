@@ -82,10 +82,12 @@ export function renderPyramid(container, state, isNew = false) {
   pyramidEl.className = 'pyramid-grid';
   pyramidEl.setAttribute('role', 'grid');
   pyramidEl.setAttribute('aria-label', 'Pyramid of cards');
+  const rowHeightFactor = 0.55;
   state.pyramid.forEach((row, rowIdx) => {
     const rowEl = document.createElement('div');
     rowEl.className = 'pyramid-row';
     rowEl.style.zIndex = rowIdx + 1;
+    rowEl.style.top = `calc(var(--pyramid-card-height) * ${rowHeightFactor} * ${rowIdx})`;
     row.forEach((card, colIdx) => {
       const label = card.faceUp ? `${card.rank} of ${getSuitName(card.suit)}, row ${rowIdx + 1}` : 'Face-down card';
       const cardEl = createCardElement(card, { label });

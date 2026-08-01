@@ -29,7 +29,7 @@
 
   --card-width: clamp(48px, 11vw, 80px);
   --card-height: calc(var(--card-width) * 1.4);
-  --pyramid-card-width: clamp(42px, 9vw, 64px);
+  --pyramid-card-width: clamp(36px, 7.5vw, 56px);
   --pyramid-card-height: calc(var(--pyramid-card-width) * 1.4);
   --card-radius: clamp(4px, 1.2vw, 7px);
   --card-gap: clamp(4px, 1.2vw, 8px);
@@ -1030,47 +1030,48 @@ body {
 .pyramid-tableau {
   display: flex;
   flex-direction: column;
-  gap: clamp(2px, 0.8vw, 6px);
+  align-items: center;
   width: 100%;
+  max-width: 100%;
   position: relative;
   z-index: 1;
-  align-items: center;
   padding-right: calc(var(--side-bar-width) + 12px);
-  max-height: calc(100vh - 130px);
+  min-height: 0;
 }
 
 .pyramid-top {
   display: flex;
   gap: var(--card-gap);
   align-self: flex-start;
+  margin-bottom: 8px;
   flex-shrink: 0;
 }
 
 .pyramid-grid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  isolation: isolate;
+  position: relative;
+  width: calc(var(--pyramid-card-width) * 7 + var(--card-gap) * 6);
+  /* Height = card height plus overlap per additional row */
+  height: calc(var(--pyramid-card-height) * 0.55 * 6 + var(--pyramid-card-height));
+  flex-shrink: 0;
 }
 
 .pyramid-row {
+  position: absolute;
+  left: 0;
+  right: 0;
   display: flex;
-  gap: clamp(2px, 0.6vw, 4px);
-  position: relative;
-  margin-bottom: calc(var(--pyramid-card-height) * -0.45);
-}
-
-.pyramid-row:last-child {
-  margin-bottom: 0;
+  justify-content: center;
+  gap: var(--card-gap);
+  height: var(--pyramid-card-height);
 }
 
 .pyramid-row .card {
   position: relative;
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
-  width: var(--pyramid-card-width, var(--card-width));
-  height: var(--pyramid-card-height, var(--card-height));
+  width: var(--pyramid-card-width);
+  height: var(--pyramid-card-height);
+  flex-shrink: 0;
 }
 
 .pyramid-row .card:hover {
@@ -1090,10 +1091,9 @@ body {
 
 .pyramid-remove-btn {
   align-self: center;
-  margin: 4px 0;
+  margin: 8px 0;
   border-color: var(--color-gold);
   color: var(--color-gold);
-  flex-shrink: 0;
 }
 
 .pyramid-remove-btn:hover {
@@ -1115,53 +1115,15 @@ body {
   transform: scale(0.95);
 }
 
-.pyramid-grid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.pyramid-row {
-  display: flex;
-  gap: 4px;
-}
-
-.pyramid-row .card {
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.1s;
-}
-
-.pyramid-row .card:hover {
-  transform: translateY(-2px);
-}
-
-.pyramid-row .card.selected {
-  box-shadow: 0 0 0 3px var(--color-gold), 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-.pyramid-row .card.card-removed {
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.pyramid-remove-btn {
-  align-self: center;
-  margin: 8px 0;
-  border-color: var(--color-gold);
-  color: var(--color-gold);
-}
-
-.pyramid-remove-btn:hover {
-  background: rgba(212, 160, 23, 0.15);
-}
+/* Duplicate block removed below */
 
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   :root {
     --card-width: 52px;
     --card-height: calc(var(--card-width) * 1.4);
+    --pyramid-card-width: 34px;
+    --pyramid-card-height: calc(var(--pyramid-card-width) * 1.4);
     --card-gap: 4px;
     --stack-overlap: 16px;
     --side-bar-width: 52px;
