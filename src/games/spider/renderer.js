@@ -48,7 +48,7 @@ export function renderSpider(container, state, isNew = false) {
   // Score bar
   const scoreBar = document.createElement('div');
   scoreBar.className = 'score-bar';
-  scoreBar.innerHTML = `<span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span> <span>Score: <span class="score-value">${state.score}</span></span> <span>Moves: <span class="moves-value">${state.moves}</span></span>`;
+  scoreBar.innerHTML = `<span>⏱ <span id="timer-display">${formatTime(state.elapsed)}</span></span> <span>Runs: <span class="runs-value">${state.completedRuns}/8</span></span> <span>Score: <span class="score-value">${state.score}</span></span> <span>Moves: <span class="moves-value">${state.moves}</span></span>`;
   table.appendChild(scoreBar);
 
   // Top: stock
@@ -103,7 +103,7 @@ export function renderSpider(container, state, isNew = false) {
   newGameBtn.addEventListener('click', async () => {
     clearHint();
     if (state.moves === 0) {
-      const ns = createSpider(state.difficulty);
+      const ns = createSpider(state.difficulty, state.variant);
       renderSpider(document.getElementById('game-container'), ns, true);
       return;
     }
@@ -114,7 +114,7 @@ export function renderSpider(container, state, isNew = false) {
       cancelText: 'Cancel',
     });
     if (confirmed) {
-      const ns = createSpider(state.difficulty);
+      const ns = createSpider(state.difficulty, state.variant);
       renderSpider(document.getElementById('game-container'), ns, true);
     }
   });
@@ -263,7 +263,7 @@ function showHint(hint) {
 
 function showStatsPanel(state) {
   const allStats = getAllStats('spider');
-  const modeKey = `diff${state.difficulty}`;
+  const modeKey = `diff${state.difficulty}-${state.variant}`;
   let html = '<div class="stats-content">';
   if (Object.keys(allStats).length === 0) {
     html += '<p class="stats-empty">No games played yet.</p>';

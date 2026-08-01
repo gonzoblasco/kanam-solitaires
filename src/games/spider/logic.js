@@ -20,7 +20,7 @@ const SUIT_SETS = {
 
 const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
 
-export function createSpider(difficulty = 1) {
+export function createSpider(difficulty = 1, variant = 'classic') {
   const suits = SUIT_SETS[difficulty] || SUIT_SETS[1];
   // Total cards must be 104. With 13 ranks and N suits, each rank appears 104 / (N * 13) times.
   const copiesPerRank = Math.floor(104 / (suits.length * RANKS.length));
@@ -60,10 +60,12 @@ export function createSpider(difficulty = 1) {
   const stock = deck.slice(idx);
   return {
     difficulty,
+    variant,
     tableau,
     stock,
     score: 0,
     moves: 0,
+    completedRuns: 0,
     history: [],
     startTime: null,
     elapsed: 0,
@@ -80,6 +82,7 @@ function snapshot(state) {
     stock: state.stock.map((c) => ({ ...c })),
     score: state.score,
     moves: state.moves,
+    completedRuns: state.completedRuns,
   };
 }
 
@@ -88,6 +91,7 @@ function restore(state, snap) {
   state.stock = snap.stock;
   state.score = snap.score;
   state.moves = snap.moves;
+  state.completedRuns = snap.completedRuns;
 }
 
 function pushUndo(state) {
@@ -128,9 +132,10 @@ export function formatTime(ms) {
 
 /* ─── Validation ─── */
 
-export function canMoveToColumn(card, column) {
+export function canMoveToColumn(card, column, variant = 'classic') {
   if (column.length === 0) return true;
   const top = column[column.length - 1];
+  if (variant === 'strict' && card.suit !== top.suit) return false;
   return rankValue(card.rank) === rankValue(top.rank) - 1;
 }
 
@@ -160,7 +165,7 @@ export function moveRun(state, sourceCol, cardIndex, targetCol) {
   if (runStart === -1) return false;
 
   const cards = state.tableau[sourceCol].slice(runStart);
-  if (!canMoveToColumn(cards[0], state.tableau[targetCol])) return false;
+  if (!canMoveToColumn(cards[0], state.tableau[targetCol], state.variant)) return false;
 
   pushUndo(state);
   state.tableau[sourceCol].splice(runStart);
@@ -221,6 +226,7 @@ export function checkCompleteRun(state, colIndex) {
     if (ascending && run[0].rank === 'A' && run[12].rank === 'K') {
       column.splice(start, 13);
       state.score += 100;
+      state.completedRuns++;
       if (column.length > 0) {
         const newTop = column[column.length - 1];
         if (!newTop.faceUp) {
@@ -242,6 +248,7 @@ export function checkCompleteRun(state, colIndex) {
     if (descending && run[0].rank === 'K' && run[12].rank === 'A') {
       column.splice(start, 13);
       state.score += 100;
+      state.completedRuns++;
       if (column.length > 0) {
         const newTop = column[column.length - 1];
         if (!newTop.faceUp) {
@@ -293,7 +300,7 @@ export function findHint(state) {
       const runCard = column[runStart];
       for (let dstCol = 0; dstCol < 10; dstCol++) {
         if (dstCol === srcCol) continue;
-        if (canMoveToColumn(runCard, state.tableau[dstCol])) {
+        if (canMoveToColumn(runCard, state.tableau[dstCol], state.variant)) {
           return { sourceCol: srcCol, cardIndex: runStart, destCol: dstCol };
         }
       }

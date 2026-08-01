@@ -13,12 +13,14 @@ export const label = 'Spider';
 export function getOptions() {
   return {
     difficulty: { type: 'select', label: 'Suits', options: [1, 2, 4], default: 1 },
+    variant: { type: 'select', label: 'Rules', options: ['classic', 'strict'], default: 'classic' },
   };
 }
 
 export function init(container, options = {}) {
   const difficulty = options.difficulty ?? 1;
-  currentState = createSpider(difficulty);
+  const variant = options.variant ?? 'classic';
+  currentState = createSpider(difficulty, variant);
   renderSpider(container, currentState, true);
   return currentState;
 }
