@@ -48,9 +48,9 @@ export function createKlondike(drawMode = 1, scoringMode = 'standard', variant =
     drawMode,
     scoringMode,
     variant,
-    startTime: null,
+    startTime: Date.now(),
     elapsed: 0,
-    timerRunning: false,
+    timerRunning: true,
     won: false,
   };
 }

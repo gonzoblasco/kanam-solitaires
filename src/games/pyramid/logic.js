@@ -40,9 +40,9 @@ export function createPyramid(variant = 'classic') {
     moves: 0,
     history: [],
     variant,
-    startTime: null,
+    startTime: Date.now(),
     elapsed: 0,
-    timerRunning: false,
+    timerRunning: true,
     won: false,
   };
 }

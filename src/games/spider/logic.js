@@ -67,9 +67,9 @@ export function createSpider(difficulty = 1, variant = 'classic') {
     moves: 0,
     completedRuns: 0,
     history: [],
-    startTime: null,
+    startTime: Date.now(),
     elapsed: 0,
-    timerRunning: false,
+    timerRunning: true,
     won: false,
   };
 }
