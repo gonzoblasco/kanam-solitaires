@@ -22,7 +22,7 @@ import {
 
 let currentState = null;
 let timerInterval = null;
-const animating = false;
+let animating = false;
 
 const SUIT_NAMES = {
   '♠': 'Spades',
@@ -36,6 +36,7 @@ function getSuitName(suit) {
 }
 
 /* ─── Timer ─── */
+function startTimerDisplay(state) {
   if (timerInterval) clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     tickTimer(state);
