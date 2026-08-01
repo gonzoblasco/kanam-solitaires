@@ -108,13 +108,15 @@
 - [x] Pre-commit hook con `simple-git-hooks`
 
 ### 6.6 Lighthouse
-- [ ] Score ≥ 90 en Performance, Accessibility, Best Practices
-- [ ] SEO básico para juego web
+- [~] Score ≥ 90 en Performance, Accessibility, Best Practices
+  - Actual: Accessibility 100, Best Practices 100, SEO 100, Performance 80
+  - Bloqueado por CLS 0.42 del renderizado inicial del tablero en `#game-container`. Requiere refactor del renderer para hidratar estructura estática o estructura base pre-renderizada.
+- [x] SEO básico para juego web
 
 ### 6.7 PWA
-- [ ] Manifest
-- [ ] Service worker con `vite-plugin-pwa`
-- [ ] Iconos 192/512
+- [x] Manifest con iconos PNG 192/512
+- [x] Service worker propio (`public/sw.js`) con cache de shell/assets
+- [x] Registro funcionando, sin errores de consola
 
 ### 6.8 Persistencia
 - [ ] Guardar partida en curso por juego (localStorage)

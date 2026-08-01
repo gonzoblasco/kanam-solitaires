@@ -8,13 +8,22 @@ import * as pyramid from './games/pyramid/index.js';
 import * as spider from './games/spider/index.js';
 import { getGame, getGames, registerGame, resumeGame, startGame } from './lib/gameRegistry.js';
 import { loadGameState } from './lib/saveState.js';
-import { isSoundEnabled, setSoundEnabled, getVolume, setVolume, isSoundTypeEnabled, setSoundTypeEnabled, SOUND_TYPES, resetSoundSettings } from './lib/sound.js';
+import {
+  SOUND_TYPES,
+  getVolume,
+  isSoundEnabled,
+  isSoundTypeEnabled,
+  resetSoundSettings,
+  setSoundEnabled,
+  setSoundTypeEnabled,
+  setVolume,
+} from './lib/sound.js';
 
 // Register service worker for PWA
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker
-      .register('/kanam-solitaires/sw.js')
+      .register('./sw.js')
       .then((reg) => console.log('SW registered:', reg.scope))
       .catch((err) => console.error('SW registration failed:', err));
   });
@@ -171,12 +180,14 @@ function showSoundPanel() {
 
       <fieldset class="sound-types">
         <legend class="sound-legend">Sound types</legend>
-        ${SOUND_TYPES.map((type) => `
+        ${SOUND_TYPES.map(
+          (type) => `
           <label class="sound-row">
             <span class="sound-label">${SOUND_LABELS[type]}</span>
             <input type="checkbox" class="sound-type-toggle" data-type="${type}" ${isSoundTypeEnabled(type) ? 'checked' : ''} />
           </label>
-        `).join('')}
+        `,
+        ).join('')}
       </fieldset>
     </div>
     <div class="modal-actions">

@@ -212,7 +212,7 @@ function createColumnElement(state, colIndex, isNew) {
   const el = document.createElement('div');
   el.className = 'spider-column';
   el.dataset.columnIndex = colIndex;
-  el.setAttribute('role', 'list');
+  el.setAttribute('role', 'group');
   el.setAttribute('aria-label', `Column ${colIndex + 1}, ${state.tableau[colIndex].length} cards`);
 
   const pileEl = document.createElement('div');

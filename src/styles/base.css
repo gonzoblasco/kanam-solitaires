@@ -90,6 +90,7 @@ body {
   flex-shrink: 0;
   flex-wrap: wrap;
   gap: 4px;
+  min-height: 96px;
 }
 
 .app-title {
@@ -102,7 +103,7 @@ body {
 
 .game-nav {
   display: flex;
-  gap: 4px;
+  gap: 6px;
 }
 
 .game-btn {
@@ -114,6 +115,8 @@ body {
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.15s;
+  min-height: 40px;
+  min-width: 40px;
 }
 
 .game-btn:hover:not(:disabled) {
@@ -143,6 +146,8 @@ body {
   overflow: auto;
   position: relative;
   transition: opacity 0.2s;
+  height: calc(100vh - 96px);
+  min-height: calc(100vh - 96px);
   /* Custom scrollbar */
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
@@ -541,17 +546,17 @@ body {
 .mode-selectors {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   flex-wrap: wrap;
 }
 
 .mode-group {
   display: flex;
   align-items: center;
-  gap: 1px;
+  gap: 4px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
-  padding: 1px;
+  padding: 2px;
 }
 
 .mode-label {
@@ -564,16 +569,22 @@ body {
 }
 
 .mode-btn {
-  padding: 2px 6px;
+  padding: 6px 10px;
   border: none;
   border-radius: 4px;
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
+  min-height: 32px;
+  min-width: 32px;
+}
+
+.mode-btn + .mode-btn {
+  margin-left: 2px;
 }
 
 .mode-btn:hover {
@@ -913,11 +924,13 @@ body {
   background: none;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 1rem;
+  padding: 6px 10px;
+  font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.15s;
   line-height: 1;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .sound-toggle:hover {
@@ -1221,13 +1234,26 @@ body {
   }
 
   .game-btn {
-    padding: 4px 8px;
+    padding: 6px 10px;
     font-size: 0.75rem;
+    min-height: 40px;
   }
 
-  .draw-mode-btn {
-    padding: 2px 7px;
-    font-size: 0.7rem;
+  .mode-btn {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  .mode-group {
+    gap: 4px;
+    padding: 2px;
+  }
+
+  .sound-toggle {
+    min-width: 48px;
+    min-height: 48px;
   }
 
   #game-container {

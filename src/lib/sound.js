@@ -45,7 +45,7 @@ export function setSoundEnabled(enabled) {
 export function getVolume() {
   if (_volume === null) {
     const stored = localStorage.getItem(STORAGE_KEY_VOLUME);
-    const parsed = stored === null ? NaN : Number.parseFloat(stored);
+    const parsed = stored === null ? Number.NaN : Number.parseFloat(stored);
     _volume = Number.isNaN(parsed) ? DEFAULT_VOLUME : Math.max(0, Math.min(1, parsed));
   }
   return _volume;

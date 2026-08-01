@@ -9,8 +9,24 @@
   <link rel="icon" type="image/svg+xml" href="./icons/favicon.svg" />
   <link rel="apple-touch-icon" href="./icons/apple-touch-icon.svg" />
   <title>Kanam's Solitaires</title>
-  <script type="module" crossorigin src="./assets/index-DS-URqB3.js"></script>
-  <link rel="stylesheet" crossorigin href="./assets/index-_aqHpBCI.css">
+  <style>
+    /* Critical CSS to prevent layout shift before Vite CSS loads */
+    html, body { margin: 0; padding: 0; min-height: 100%; }
+    #app { display: flex; flex-direction: column; min-height: 100vh; }
+    .app-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; padding: 6px 16px; min-height: 96px; }
+    .app-title { font-size: 1.1rem; font-weight: 600; white-space: nowrap; margin: 0; }
+    .header-right { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .game-nav { display: flex; gap: 6px; }
+    .game-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; min-width: 40px; padding: 6px 14px; font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; background: rgba(255,255,255,0.04); color: #a09880; }
+    .mode-selectors { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+    .mode-group { display: flex; align-items: center; gap: 4px; padding: 2px; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; }
+    .mode-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; min-width: 32px; padding: 6px 10px; font-size: 0.75rem; border: none; border-radius: 4px; background: transparent; color: #a09880; }
+    .sound-toggle { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; min-width: 44px; padding: 6px 10px; font-size: 1.1rem; border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; background: transparent; color: #e8e0d0; }
+    #game-container { flex: 1; display: flex; align-items: flex-start; justify-content: center; height: calc(100vh - 96px); min-height: calc(100vh - 96px); overflow: auto; padding: 12px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+  </style>
+  <script type="module" crossorigin src="./assets/index-C4dqPHvw.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CFlRXsOt.css">
 </head>
 <body>
   <div id="app">

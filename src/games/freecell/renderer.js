@@ -295,7 +295,7 @@ function createColumnElement(state, colIndex, isNew) {
   const el = document.createElement('div');
   el.className = 'freecell-column';
   el.dataset.columnIndex = colIndex;
-  el.setAttribute('role', 'list');
+  el.setAttribute('role', 'group');
   el.setAttribute('aria-label', `Tableau column ${colIndex + 1}, ${state.tableau[colIndex].length} cards`);
 
   const pileEl = document.createElement('div');

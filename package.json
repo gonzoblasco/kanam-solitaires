@@ -21,6 +21,8 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "happy-dom": "^17.6.3",
+    "lighthouse": "^13.4.1",
+    "sharp": "^0.35.3",
     "simple-git-hooks": "^2.13.1",
     "vite": "^8.2.0",
     "vitest": "^3.2.7"

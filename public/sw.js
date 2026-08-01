@@ -1,11 +1,13 @@
-const CACHE_NAME = 'kanam-solitaires-v1';
+const CACHE_NAME = 'kanam-solitaires-v2';
 const ASSETS = [
-  '/kanam-solitaires/',
-  '/kanam-solitaires/index.html',
-  '/kanam-solitaires/manifest.json',
-  '/kanam-solitaires/icons/icon.svg',
-  '/kanam-solitaires/icons/favicon.svg',
-  '/kanam-solitaires/icons/apple-touch-icon.svg',
+  './',
+  './index.html',
+  './manifest.json',
+  './icons/icon.svg',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
+  './icons/favicon.svg',
+  './icons/apple-touch-icon.svg',
 ];
 
 self.addEventListener('install', (event) => {
