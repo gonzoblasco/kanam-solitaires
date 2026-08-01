@@ -12,7 +12,7 @@
 
 import { createDeck, rankValue, shuffle } from '../../lib/card.js';
 
-export function createFreeCell() {
+export function createFreeCell(variant = 'classic') {
   const deck = shuffle(createDeck());
 
   // All cards face up
@@ -36,6 +36,7 @@ export function createFreeCell() {
     score: 0,
     moves: 0,
     history: [],
+    variant,
     startTime: null,
     elapsed: 0,
     timerRunning: false,
@@ -107,19 +108,23 @@ export function canMoveToFoundation(card, foundation) {
   return top.suit === card.suit && rankValue(card.rank) === rankValue(top.rank) + 1;
 }
 
-export function canMoveToColumn(card, column) {
+export function canMoveToColumn(card, column, variant = 'classic') {
   if (column.length === 0) return true;
   const top = column[column.length - 1];
+  if (variant === 'bakers-game') {
+    return rankValue(card.rank) === rankValue(top.rank) - 1 && card.suit === top.suit;
+  }
   return rankValue(card.rank) === rankValue(top.rank) - 1 && card.color !== top.color;
 }
 
 /**
  * Get the max number of cards that can be moved in a run.
- * Formula: 2^(empty free cells + 1)
+ * Real formula: (freeCells + 1) * 2^emptyColumns
  */
 export function getMaxMovable(state) {
   const emptyCells = state.freeCells.filter((c) => c === null).length;
-  return 2 ** (emptyCells + 1);
+  const emptyColumns = state.tableau.filter((col) => col.length === 0).length;
+  return (emptyCells + 1) * 2 ** emptyColumns;
 }
 
 /**
@@ -149,7 +154,7 @@ export function moveRun(state, sourceCol, cardIndex, targetCol) {
   if (runStart === -1) return false;
 
   const cards = state.tableau[sourceCol].slice(runStart);
-  if (!canMoveToColumn(cards[0], state.tableau[targetCol])) return false;
+  if (!canMoveToColumn(cards[0], state.tableau[targetCol], state.variant)) return false;
 
   pushUndo(state);
   state.tableau[sourceCol].splice(runStart);
@@ -175,7 +180,7 @@ export function moveToFreeCell(state, colIndex) {
 export function moveFromFreeCell(state, cellIndex, targetCol) {
   const card = state.freeCells[cellIndex];
   if (!card) return false;
-  if (!canMoveToColumn(card, state.tableau[targetCol])) return false;
+  if (!canMoveToColumn(card, state.tableau[targetCol], state.variant)) return false;
 
   pushUndo(state);
   state.tableau[targetCol].push(card);
@@ -250,7 +255,7 @@ export function findHint(state) {
       const runCard = column[runStart];
       for (let dstCol = 0; dstCol < 8; dstCol++) {
         if (dstCol === srcCol) continue;
-        if (canMoveToColumn(runCard, state.tableau[dstCol])) {
+        if (canMoveToColumn(runCard, state.tableau[dstCol], state.variant)) {
           return { source: 'tableau', sourceIndex: srcCol, cardIndex: runStart, dest: 'tableau', destIndex: dstCol };
         }
       }

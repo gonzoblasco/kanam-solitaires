@@ -11,11 +11,14 @@ export const name = 'pyramid';
 export const label = 'Pyramid';
 
 export function getOptions() {
-  return {};
+  return {
+    variant: { type: 'select', label: 'Rules', options: ['classic', 'relaxed'], default: 'classic' },
+  };
 }
 
 export function init(container, options = {}) {
-  currentState = createPyramid();
+  const variant = options.variant ?? 'classic';
+  currentState = createPyramid(variant);
   renderPyramid(container, currentState, true);
   return currentState;
 }

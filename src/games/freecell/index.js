@@ -11,11 +11,14 @@ export const name = 'freecell';
 export const label = 'FreeCell';
 
 export function getOptions() {
-  return {};
+  return {
+    variant: { type: 'select', label: 'Rules', options: ['classic', 'bakers-game'], default: 'classic' },
+  };
 }
 
 export function init(container, options = {}) {
-  currentState = createFreeCell();
+  const variant = options.variant ?? 'classic';
+  currentState = createFreeCell(variant);
   renderFreeCell(container, currentState, true);
   return currentState;
 }

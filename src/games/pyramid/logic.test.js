@@ -73,4 +73,31 @@ describe('Pyramid Solitaire', () => {
     expect(state.waste.length).toBe(1);
     expect(state.selected).toEqual([{ row: 0, col: 0 }]);
   });
+
+  it('relaxed variant allows selecting non-exposed cards', () => {
+    const state = createPyramid('relaxed');
+    state.pyramid = [
+      [{ suit: '♠', rank: '6', value: 6, color: 'black', faceUp: true, removed: false }],
+      [
+        { suit: '♥', rank: 'K', value: 13, color: 'red', faceUp: true, removed: false },
+        { suit: '♣', rank: '7', value: 7, color: 'black', faceUp: true, removed: false },
+      ],
+    ];
+    // In classic, row 0 is not exposed (cards below not removed)
+    // In relaxed, it should be selectable
+    expect(toggleSelect(state, 0, 0)).toBe(true);
+    expect(state.selected).toEqual([{ row: 0, col: 0 }]);
+  });
+
+  it('classic variant blocks non-exposed cards', () => {
+    const state = createPyramid('classic');
+    state.pyramid = [
+      [{ suit: '♠', rank: '6', value: 6, color: 'black', faceUp: true, removed: false }],
+      [
+        { suit: '♥', rank: 'K', value: 13, color: 'red', faceUp: true, removed: false },
+        { suit: '♣', rank: '7', value: 7, color: 'black', faceUp: true, removed: false },
+      ],
+    ];
+    expect(toggleSelect(state, 0, 0)).toBe(false);
+  });
 });

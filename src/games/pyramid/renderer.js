@@ -153,7 +153,7 @@ export function renderPyramid(container, state, isNew = false) {
   newGameBtn.addEventListener('click', async () => {
     clearHint();
     if (state.moves === 0) {
-      const ns = createPyramid();
+      const ns = createPyramid(state.variant);
       renderPyramid(document.getElementById('game-container'), ns, true);
       return;
     }
@@ -164,7 +164,7 @@ export function renderPyramid(container, state, isNew = false) {
       cancelText: 'Cancel',
     });
     if (confirmed) {
-      const ns = createPyramid();
+      const ns = createPyramid(state.variant);
       renderPyramid(document.getElementById('game-container'), ns, true);
     }
   });

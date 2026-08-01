@@ -11,7 +11,7 @@
 
 import { createDeck, rankValue, shuffle } from '../../lib/card.js';
 
-export function createPyramid() {
+export function createPyramid(variant = 'classic') {
   const deck = shuffle(createDeck());
   deck.forEach((c) => {
     c.faceUp = true;
@@ -39,6 +39,7 @@ export function createPyramid() {
     score: 0,
     moves: 0,
     history: [],
+    variant,
     startTime: null,
     elapsed: 0,
     timerRunning: false,
@@ -155,7 +156,7 @@ function isKing(card) {
 export function toggleSelect(state, row, col) {
   const card = state.pyramid[row][col];
   if (card.removed) return false;
-  if (!isExposed(state.pyramid, row, col)) return false;
+  if (state.variant !== 'relaxed' && !isExposed(state.pyramid, row, col)) return false;
 
   // Check if already selected
   const existingIdx = state.selected.findIndex((s) => s.row === row && s.col === col);
