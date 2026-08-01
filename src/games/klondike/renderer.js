@@ -296,9 +296,9 @@ export function renderKlondike(container, state, isNew = false) {
     container.appendChild(wb);
     spawnConfetti();
     playVictory();
+  } else if (isNew || !timerInterval) {
+    startTimerDisplay(state);
   }
-
-  startTimerDisplay(state);
 }
 
 function rerender(state) {

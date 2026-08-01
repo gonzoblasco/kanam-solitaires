@@ -153,7 +153,7 @@ export function renderSpider(container, state, isNew = false) {
   if (isGameWon(state)) {
     stopTimer(state);
     stopTimerDisplay();
-    const modeKey = `diff${state.difficulty}`;
+    const modeKey = `diff${state.difficulty}-${state.variant ?? 'classic'}`;
     recordGame('spider', modeKey, true, state.elapsed, state.score, state.moves);
     const stats = getStats('spider', modeKey);
     const wb = document.createElement('div');
@@ -162,9 +162,9 @@ export function renderSpider(container, state, isNew = false) {
     container.appendChild(wb);
     spawnConfetti();
     playVictory();
+  } else if (isNew || !timerInterval) {
+    startTimerDisplay(state);
   }
-
-  startTimerDisplay(state);
 }
 
 function rerender(state) {

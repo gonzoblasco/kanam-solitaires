@@ -175,7 +175,7 @@ export function renderFreeCell(container, state, isNew = false) {
   if (isGameWon(state)) {
     stopTimer(state);
     stopTimerDisplay();
-    const modeKey = 'freecell';
+    const modeKey = state.variant ?? 'classic';
     recordGame('freecell', modeKey, true, state.elapsed, state.score, state.moves);
     const stats = getStats('freecell', modeKey);
     const wb = document.createElement('div');
@@ -184,9 +184,9 @@ export function renderFreeCell(container, state, isNew = false) {
     container.appendChild(wb);
     spawnConfetti();
     playVictory();
+  } else if (isNew || !timerInterval) {
+    startTimerDisplay(state);
   }
-
-  startTimerDisplay(state);
 }
 
 function rerender(state) {

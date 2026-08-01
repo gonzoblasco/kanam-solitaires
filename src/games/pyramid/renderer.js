@@ -208,7 +208,7 @@ export function renderPyramid(container, state, isNew = false) {
   if (isGameWon(state)) {
     stopTimer(state);
     stopTimerDisplay();
-    const modeKey = 'pyramid';
+    const modeKey = state.variant ?? 'classic';
     recordGame('pyramid', modeKey, true, state.elapsed, state.score, state.moves);
     const stats = getStats('pyramid', modeKey);
     const wb = document.createElement('div');
@@ -217,9 +217,9 @@ export function renderPyramid(container, state, isNew = false) {
     container.appendChild(wb);
     spawnConfetti();
     playVictory();
+  } else if (isNew || !timerInterval) {
+    startTimerDisplay(state);
   }
-
-  startTimerDisplay(state);
 }
 
 function rerender(state) {
