@@ -22,7 +22,7 @@ import {
 
 let currentState = null;
 let timerInterval = null;
-let animating = false;
+const animating = false;
 
 const SUIT_NAMES = {
   '♠': 'Spades',

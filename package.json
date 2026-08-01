@@ -13,7 +13,7 @@
     "prepare": "simple-git-hooks"
   },
   "simple-git-hooks": {
-    "pre-commit": "npx biome check --fix --unsafe . && npx vitest run"
+    "pre-commit": "npx biome check . && npx vitest run && npm run build"
   },
   "keywords": ["solitaire", "card-games", "klondike"],
   "author": "Gonzalo Blasco",
