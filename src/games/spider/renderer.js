@@ -10,10 +10,12 @@ import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sou
 import { getAllStats, getStats, recordGame, resetStats, startGame } from '../../lib/stats.js';
 import {
   autoComplete,
+  canMoveToColumn,
   createSpider,
   drawStock,
   findHint,
   formatTime,
+  getRunStart,
   isGameWon,
   moveRun,
   stopTimer,
@@ -198,7 +200,9 @@ function createStockElement(state) {
     const cardEl = createCardElement(card);
     cardEl.addEventListener('click', () => {
       drawStock(state);
-      announce('Drew $Math.min(10, state.stock.length)cards. $state.stock.lengthremaining.');
+      const remaining = state.stock.length;
+      const drawn = Math.min(10, remaining);
+      announce(`Drew ${drawn} cards. ${remaining} remaining.`);
       playClick();
       rerender(state);
     });
@@ -206,7 +210,7 @@ function createStockElement(state) {
     // Show count
     const count = document.createElement('span');
     count.className = 'stock-count';
-    count.textContent = '$state.stock.length';
+    count.textContent = String(state.stock.length);
     el.appendChild(count);
   }
   return el;
@@ -217,7 +221,7 @@ function createColumnElement(state, colIndex, isNew) {
   el.className = 'spider-column';
   el.dataset.columnIndex = colIndex;
   el.setAttribute('role', 'group');
-  el.setAttribute('aria-label', 'Column $colIndex + 1, $state.tableau[colIndex].lengthcards');
+  el.setAttribute('aria-label', `Column ${colIndex + 1}, ${state.tableau[colIndex].length} cards`);
 
   const pileEl = document.createElement('div');
   pileEl.className = 'column-pile';
@@ -232,26 +236,46 @@ function createColumnElement(state, colIndex, isNew) {
   } else {
     column.forEach((card, cardIndex) => {
       const cardEl = createCardElement(card, {
-        label: card.faceUp ? '$card.rankof $getSuitName(card.suit), column $colIndex + 1' : 'Face-down card',
+        label: card.faceUp ? `${card.rank} of ${getSuitName(card.suit)}, column ${colIndex + 1}` : 'Face-down card',
       });
       const overlap = card.faceUp ? 20 : 8;
-      cardEl.style.top = '$cardIndex * overlappx';
+      cardEl.style.top = `${cardIndex * overlap}px`;
       cardEl.style.zIndex = cardIndex;
       if (isNew) {
         cardEl.classList.add('dealing');
-        cardEl.style.animationDelay = '$colIndex * 0.08 + cardIndex * 0.04s';
+        cardEl.style.animationDelay = `${colIndex * 0.08 + cardIndex * 0.04}s`;
       }
       if (card.faceUp) {
         cardEl.draggable = true;
         cardEl.addEventListener('dragstart', (e) =>
-          e.dataTransfer.setData('text/plain', 'spider-$colIndex-$cardIndex'),
+          e.dataTransfer.setData('text/plain', `spider-${colIndex}-${cardIndex}`),
         );
+        cardEl.addEventListener('dblclick', () => {
+          const runStart = getRunStart(column, cardIndex);
+          if (runStart === -1 || runStart !== cardIndex) return;
+          const cards = column.slice(runStart);
+          let targetCol = -1;
+          for (let i = 0; i < state.tableau.length; i++) {
+            if (i === colIndex) continue;
+            if (canMoveToColumn(cards[0], state.tableau[i], state.variant)) {
+              targetCol = i;
+              break;
+            }
+          }
+          if (targetCol !== -1) {
+            if (moveRun(state, colIndex, cardIndex, targetCol)) {
+              announce(`Moved cards to column ${targetCol + 1}`);
+              playSlide();
+              rerender(state);
+            }
+          }
+        });
       }
       pileEl.appendChild(cardEl);
     });
     const lastOverlap = column[column.length - 1].faceUp ? 20 : 8;
     const lastCardOffset = (column.length - 1) * lastOverlap;
-    pileEl.style.height = '$lastCardOffset + 112px';
+    pileEl.style.height = `${lastCardOffset + 112}px`;
   }
 
   pileEl.addEventListener('dragover', (e) => {
@@ -272,7 +296,7 @@ function createColumnElement(state, colIndex, isNew) {
     }
     if (moved) {
       playSlide();
-      announce('Moved cards to column $colIndex + 1');
+      announce(`Moved cards to column ${colIndex + 1}`);
     }
     rerender(state);
   });
