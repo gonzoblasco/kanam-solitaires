@@ -38,6 +38,27 @@ function getSuitName(suit) {
   return SUIT_NAMES[suit] || suit;
 }
 
+/* ─── Auto-move helper for double click / double tap ─── */
+function performAutoMove(state, colIndex, cardIndex) {
+  const column = state.tableau[colIndex];
+  const runStart = getRunStart(column, cardIndex);
+  if (runStart === -1 || runStart !== cardIndex) return;
+  const cards = column.slice(runStart);
+  let targetCol = -1;
+  for (let i = 0; i < state.tableau.length; i++) {
+    if (i === colIndex) continue;
+    if (canMoveToColumn(cards[0], state.tableau[i], state.variant)) {
+      targetCol = i;
+      break;
+    }
+  }
+  if (targetCol !== -1 && moveRun(state, colIndex, cardIndex, targetCol)) {
+    announce(`Moved cards to column ${targetCol + 1}`);
+    playSlide();
+    rerender(state);
+  }
+}
+
 /* ─── Timer ─── */
 function startTimerDisplay(state) {
   if (timerInterval) clearInterval(timerInterval);
@@ -250,25 +271,16 @@ function createColumnElement(state, colIndex, isNew) {
         cardEl.addEventListener('dragstart', (e) =>
           e.dataTransfer.setData('text/plain', `spider-${colIndex}-${cardIndex}`),
         );
-        cardEl.addEventListener('dblclick', () => {
-          const runStart = getRunStart(column, cardIndex);
-          if (runStart === -1 || runStart !== cardIndex) return;
-          const cards = column.slice(runStart);
-          let targetCol = -1;
-          for (let i = 0; i < state.tableau.length; i++) {
-            if (i === colIndex) continue;
-            if (canMoveToColumn(cards[0], state.tableau[i], state.variant)) {
-              targetCol = i;
-              break;
-            }
+        cardEl.addEventListener('dblclick', () => performAutoMove(state, colIndex, cardIndex));
+        let lastTap = 0;
+        cardEl.addEventListener('touchend', (e) => {
+          const now = Date.now();
+          if (now - lastTap < 350) {
+            e.preventDefault();
+            e.stopPropagation();
+            performAutoMove(state, colIndex, cardIndex);
           }
-          if (targetCol !== -1) {
-            if (moveRun(state, colIndex, cardIndex, targetCol)) {
-              announce(`Moved cards to column ${targetCol + 1}`);
-              playSlide();
-              rerender(state);
-            }
-          }
+          lastTap = now;
         });
       }
       pileEl.appendChild(cardEl);
