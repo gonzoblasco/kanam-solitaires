@@ -5,7 +5,7 @@
 import { announce } from '../../lib/announcer.js';
 import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
-import { saveGameState } from '../../lib/saveState.js';
+import { clearGameState, saveGameState } from '../../lib/saveState.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
 import { getAllStats, getStats, recordGame, resetStats, startGame } from '../../lib/stats.js';
 import {
@@ -153,6 +153,7 @@ export function renderFreeCell(container, state, isNew = false) {
       recordGame('freecell', modeKey, false, state.elapsed, state.score, state.moves);
     }
     if (state.moves === 0) {
+      clearGameState('freecell');
       const ns = createFreeCell(state.variant);
       startGame('freecell', modeKey);
       renderFreeCell(document.getElementById('game-container'), ns, true);
@@ -165,6 +166,7 @@ export function renderFreeCell(container, state, isNew = false) {
       cancelText: 'Cancel',
     });
     if (confirmed) {
+      clearGameState('freecell');
       const ns = createFreeCell(state.variant);
       startGame('freecell', modeKey);
       renderFreeCell(document.getElementById('game-container'), ns, true);
@@ -184,6 +186,7 @@ export function renderFreeCell(container, state, isNew = false) {
   if (isGameWon(state)) {
     stopTimer(state);
     stopTimerDisplay();
+    clearGameState('freecell');
     const modeKey = state.variant ?? 'classic';
     recordGame('freecell', modeKey, true, state.elapsed, state.score, state.moves);
     const stats = getStats('freecell', modeKey);

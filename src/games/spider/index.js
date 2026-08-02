@@ -29,7 +29,7 @@ export function init(container, options = {}) {
   const difficulty = options.difficulty ?? 1;
   const variant = options.variant ?? 'classic';
   currentState = createSpider(difficulty, variant);
-  clearGameState();
+  clearGameState(name);
   startGame('spider', `diff${difficulty}-${variant}`);
   renderSpider(container, currentState, true);
   return currentState;

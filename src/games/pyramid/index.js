@@ -27,7 +27,7 @@ export function resume(container, state) {
 export function init(container, options = {}) {
   const variant = options.variant ?? 'classic';
   currentState = createPyramid(variant);
-  clearGameState();
+  clearGameState(name);
   startGame('pyramid', variant);
   renderPyramid(container, currentState, true);
   return currentState;

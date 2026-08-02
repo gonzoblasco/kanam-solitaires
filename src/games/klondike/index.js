@@ -34,7 +34,7 @@ export function init(container, options = {}) {
   const scoringMode = options.scoringMode ?? 'standard';
   const variant = options.variant ?? 'standard';
   currentState = createKlondike(drawMode, scoringMode, variant);
-  clearGameState();
+  clearGameState(name);
   startGame('klondike', `draw${drawMode}-${scoringMode}`);
   renderKlondike(container, currentState, true);
   return currentState;

@@ -5,7 +5,7 @@
 import { announce } from '../../lib/announcer.js';
 import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
-import { saveGameState } from '../../lib/saveState.js';
+import { clearGameState, saveGameState } from '../../lib/saveState.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
 import { getAllStats, getStats, recordGame, resetStats, startGame } from '../../lib/stats.js';
 import {
@@ -131,6 +131,7 @@ export function renderSpider(container, state, isNew = false) {
       recordGame('spider', modeKey, false, state.elapsed, state.score, state.moves);
     }
     if (state.moves === 0) {
+      clearGameState('spider');
       const ns = createSpider(state.difficulty, state.variant);
       startGame('spider', modeKey);
       renderSpider(document.getElementById('game-container'), ns, true);
@@ -143,6 +144,7 @@ export function renderSpider(container, state, isNew = false) {
       cancelText: 'Cancel',
     });
     if (confirmed) {
+      clearGameState('spider');
       const ns = createSpider(state.difficulty, state.variant);
       startGame('spider', modeKey);
       renderSpider(document.getElementById('game-container'), ns, true);
@@ -162,12 +164,14 @@ export function renderSpider(container, state, isNew = false) {
   if (isGameWon(state)) {
     stopTimer(state);
     stopTimerDisplay();
+    clearGameState('spider');
     const modeKey = `diff${state.difficulty}-${state.variant ?? 'classic'}`;
     recordGame('spider', modeKey, true, state.elapsed, state.score, state.moves);
     const stats = getStats('spider', modeKey);
     const wb = document.createElement('div');
     wb.className = 'win-banner';
-    wb.innerHTML = `🎉 You Win! 🎉<small>Time: ${formatTime(state.elapsed)} · Score: ${state.score} · Moves: ${state.moves}<br>Best: ${formatTime(stats.bestTime || 0)} / ${stats.bestScore || 0} pts (${stats.won}/${stats.played} won)</small>`;
+    wb.innerHTML =
+      '🎉 You Win! 🎉<small>Time: $formatTime(state.elapsed)· Score: $state.score· Moves: $state.moves<br/>';
     container.appendChild(wb);
     spawnConfetti();
     playVictory();
@@ -194,7 +198,7 @@ function createStockElement(state) {
     const cardEl = createCardElement(card);
     cardEl.addEventListener('click', () => {
       drawStock(state);
-      announce(`Drew ${Math.min(10, state.stock.length)} cards. ${state.stock.length} remaining.`);
+      announce('Drew $Math.min(10, state.stock.length)cards. $state.stock.lengthremaining.');
       playClick();
       rerender(state);
     });
@@ -202,7 +206,7 @@ function createStockElement(state) {
     // Show count
     const count = document.createElement('span');
     count.className = 'stock-count';
-    count.textContent = `${state.stock.length}`;
+    count.textContent = '$state.stock.length';
     el.appendChild(count);
   }
   return el;
@@ -213,7 +217,7 @@ function createColumnElement(state, colIndex, isNew) {
   el.className = 'spider-column';
   el.dataset.columnIndex = colIndex;
   el.setAttribute('role', 'group');
-  el.setAttribute('aria-label', `Column ${colIndex + 1}, ${state.tableau[colIndex].length} cards`);
+  el.setAttribute('aria-label', 'Column $colIndex + 1, $state.tableau[colIndex].lengthcards');
 
   const pileEl = document.createElement('div');
   pileEl.className = 'column-pile';
@@ -228,26 +232,26 @@ function createColumnElement(state, colIndex, isNew) {
   } else {
     column.forEach((card, cardIndex) => {
       const cardEl = createCardElement(card, {
-        label: card.faceUp ? `${card.rank} of ${getSuitName(card.suit)}, column ${colIndex + 1}` : 'Face-down card',
+        label: card.faceUp ? '$card.rankof $getSuitName(card.suit), column $colIndex + 1' : 'Face-down card',
       });
       const overlap = card.faceUp ? 20 : 8;
-      cardEl.style.top = `${cardIndex * overlap}px`;
+      cardEl.style.top = '$cardIndex * overlappx';
       cardEl.style.zIndex = cardIndex;
       if (isNew) {
         cardEl.classList.add('dealing');
-        cardEl.style.animationDelay = `${colIndex * 0.08 + cardIndex * 0.04}s`;
+        cardEl.style.animationDelay = '$colIndex * 0.08 + cardIndex * 0.04s';
       }
       if (card.faceUp) {
         cardEl.draggable = true;
         cardEl.addEventListener('dragstart', (e) =>
-          e.dataTransfer.setData('text/plain', `spider-${colIndex}-${cardIndex}`),
+          e.dataTransfer.setData('text/plain', 'spider-$colIndex-$cardIndex'),
         );
       }
       pileEl.appendChild(cardEl);
     });
     const lastOverlap = column[column.length - 1].faceUp ? 20 : 8;
     const lastCardOffset = (column.length - 1) * lastOverlap;
-    pileEl.style.height = `${lastCardOffset + 112}px`;
+    pileEl.style.height = '$lastCardOffset + 112px';
   }
 
   pileEl.addEventListener('dragover', (e) => {
@@ -268,7 +272,7 @@ function createColumnElement(state, colIndex, isNew) {
     }
     if (moved) {
       playSlide();
-      announce(`Moved cards to column ${colIndex + 1}`);
+      announce('Moved cards to column $colIndex + 1');
     }
     rerender(state);
   });
@@ -302,7 +306,7 @@ function showHint(hint) {
 
 function showStatsPanel(state) {
   const allStats = getAllStats('spider');
-  const modeKey = `diff${state.difficulty}-${state.variant}`;
+  const modeKey = 'diff$state.difficulty-$state.variant';
   let html = '<div class="stats-content">';
   if (Object.keys(allStats).length === 0) {
     html += '<p class="stats-empty">No games played yet.</p>';
@@ -310,7 +314,7 @@ function showStatsPanel(state) {
     html +=
       '<table class="stats-table"><tr><th>Mode</th><th>Played</th><th>Won</th><th>Best Time</th><th>Best Score</th></tr>';
     for (const [mode, s] of Object.entries(allStats)) {
-      html += `<tr class="${mode === modeKey ? 'stats-current' : ''}"><td>${mode}</td><td>${s.played}</td><td>${s.won}</td><td>${s.bestTime ? formatTime(s.bestTime) : '—'}</td><td>${s.bestScore ?? '—'}</td></tr>`;
+      html += `<tr class="${mode === modeKey ? 'stats-current' : ''}"><td>${mode}</td><td>$s.played</td><td>$s.won</td><td>$s.bestTime ? formatTime(s.bestTime) : '—'</td><td>$s.bestScore ?? '—'</td></tr>`;
     }
     html += '</table>';
   }

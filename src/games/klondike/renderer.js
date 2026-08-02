@@ -264,6 +264,7 @@ export function renderKlondike(container, state, isNew = false) {
       recordGame('klondike', modeKey, false, state.elapsed, state.score, state.moves);
     }
     if (state.moves === 0) {
+      clearGameState('klondike');
       const ns = createKlondike(state.drawMode, state.scoringMode, state.variant);
       startGame('klondike', modeKey);
       renderKlondike(document.getElementById('game-container'), ns, true);
@@ -276,6 +277,7 @@ export function renderKlondike(container, state, isNew = false) {
       cancelText: 'Cancel',
     });
     if (confirmed) {
+      clearGameState('klondike');
       const ns = createKlondike(state.drawMode, state.scoringMode, state.variant);
       startGame('klondike', modeKey);
       renderKlondike(document.getElementById('game-container'), ns, true);
@@ -295,6 +297,7 @@ export function renderKlondike(container, state, isNew = false) {
   if (isGameWon(state)) {
     stopTimer(state);
     stopTimerDisplay();
+    clearGameState('klondike');
     const modeKey = `draw${state.drawMode}-${state.scoringMode}`;
     recordGame('klondike', modeKey, true, state.elapsed, state.score, state.moves);
     const stats = getStats('klondike', modeKey);
@@ -309,7 +312,7 @@ export function renderKlondike(container, state, isNew = false) {
   }
 }
 
-import { saveGameState } from '../../lib/saveState.js';
+import { clearGameState, saveGameState } from '../../lib/saveState.js';
 
 function rerender(state) {
   saveGameState('klondike', state);

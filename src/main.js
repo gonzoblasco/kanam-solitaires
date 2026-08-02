@@ -40,7 +40,14 @@ const gameNav = document.getElementById('game-nav');
 const optionsContainer = document.getElementById('game-options');
 
 let currentGameName = 'klondike';
-const currentOptions = { drawMode: 1, scoringMode: 'standard' };
+let currentOptions = {};
+
+// Restore last active game from saved state
+const saved = loadGameState();
+if (saved) {
+  currentGameName = saved.game;
+  currentOptions = saved.options;
+}
 
 // Build nav dynamically
 const games = getGames();
@@ -53,6 +60,8 @@ games.forEach((game) => {
     document.querySelectorAll('.game-btn').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
     currentGameName = game.name;
+    const slot = loadGameState(currentGameName);
+    currentOptions = slot ? slot.options : {};
     buildOptions(game);
     startCurrentGame(true);
   });
@@ -93,13 +102,11 @@ function buildOptions(game) {
 }
 
 function startCurrentGame(resumeIfSaved = true) {
-  if (resumeIfSaved) {
-    const saved = loadGameState();
-    const game = getGame(currentGameName);
-    if (saved && saved.game === currentGameName && game?.resume) {
-      resumeGame(currentGameName, container, saved.state);
-      return;
-    }
+  const saved = resumeIfSaved ? loadGameState(currentGameName) : null;
+  const game = getGame(currentGameName);
+  if (saved && game?.resume) {
+    resumeGame(currentGameName, container, saved.state);
+    return;
   }
   startGame(currentGameName, container, currentOptions);
 }
@@ -136,9 +143,10 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-// Start
-buildOptions(klondike);
-startCurrentGame();
+// Start with the restored or default game
+const initialGame = getGame(currentGameName) ?? klondike;
+buildOptions(initialGame);
+startCurrentGame(true);
 
 /* ─── Sound Settings Panel ─── */
 

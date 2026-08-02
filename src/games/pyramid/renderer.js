@@ -5,7 +5,7 @@
 import { announce } from '../../lib/announcer.js';
 import { createCardElement } from '../../lib/dom.js';
 import { showHelpModal, showModal } from '../../lib/modal.js';
-import { saveGameState } from '../../lib/saveState.js';
+import { clearGameState, saveGameState } from '../../lib/saveState.js';
 import { playClick, playFoundation, playSlide, playVictory } from '../../lib/sound.js';
 import { getAllStats, getStats, recordGame, resetStats, startGame } from '../../lib/stats.js';
 import {
@@ -186,6 +186,7 @@ export function renderPyramid(container, state, isNew = false) {
       recordGame('pyramid', modeKey, false, state.elapsed, state.score, state.moves);
     }
     if (state.moves === 0) {
+      clearGameState('pyramid');
       const ns = createPyramid(state.variant);
       startGame('pyramid', modeKey);
       renderPyramid(document.getElementById('game-container'), ns, true);
@@ -198,6 +199,7 @@ export function renderPyramid(container, state, isNew = false) {
       cancelText: 'Cancel',
     });
     if (confirmed) {
+      clearGameState('pyramid');
       const ns = createPyramid(state.variant);
       startGame('pyramid', modeKey);
       renderPyramid(document.getElementById('game-container'), ns, true);
@@ -217,6 +219,7 @@ export function renderPyramid(container, state, isNew = false) {
   if (isGameWon(state)) {
     stopTimer(state);
     stopTimerDisplay();
+    clearGameState('pyramid');
     const modeKey = state.variant ?? 'classic';
     recordGame('pyramid', modeKey, true, state.elapsed, state.score, state.moves);
     const stats = getStats('pyramid', modeKey);

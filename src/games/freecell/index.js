@@ -27,7 +27,7 @@ export function resume(container, state) {
 export function init(container, options = {}) {
   const variant = options.variant ?? 'classic';
   currentState = createFreeCell(variant);
-  clearGameState();
+  clearGameState(name);
   startGame('freecell', variant);
   renderFreeCell(container, currentState, true);
   return currentState;
