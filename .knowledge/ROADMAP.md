@@ -1,6 +1,6 @@
 # Roadmap — Kanam's Solitaires
 
-> Estado actual: 4 juegos implementados (Klondike, Spider, FreeCell, Pyramid). Bugs críticos de undo resueltos. Pendiente: pulido, tests, accesibilidad, PWA y variantes.
+> Estado actual: **v1.0.0** — 4 juegos implementados y jugables (Klondike, Spider, FreeCell, Pyramid). Persistencia, PWA, sonido, estadísticas, accesibilidad y tests listos. Pendiente: cerrar Performance ≥ 90 en Lighthouse (CLS) y expandir catálogo de juegos.
 
 ---
 
@@ -13,116 +13,103 @@
 
 ---
 
+## Reglas oficiales vs implementación actual
+
+### Klondike
+- **Estándar:** 7 columnas, draw 1 o 3, foundations A→K por palo, tableau K→A alternando colores.
+- **Implementación actual:** draw 1/3, standard/vegas scoring, foundation→tableau permitido (relajado), undo, hint, auto-complete.
+- **Variantes actuales:** Relaxed (cualquier carta en columna vacía), Strict (no foundation→tableau).
+
+### Spider
+- **Estándar:** 2 mazos, 10 columnas, 6×6 + 4×5 deal, draw 10, runs K→A del mismo palo para retirar.
+- **Implementación actual:** 1/2/4 palos, draw 10, runs K→A detectadas, undo, hint, auto-complete.
+- **Variantes actuales:** Classic, Strict (solo se pueden mover runs completas del mismo palo).
+
+### FreeCell
+- **Estándar:** 8 columnas (4×7 + 4×6), 4 free cells, 4 foundations, alternar colores en tableau.
+- **Implementación actual:** alternar colores, supermove simplificado, undo.
+- **Variantes actuales:** Classic, Baker's Game (mismo palo en tableau).
+
+### Pyramid
+- **Estándar:** 28 cartas en pirámide, 24 en stock, pares que suman 13, K solo, solo cartas expuestas.
+- **Implementación actual:** reglas estándar, undo, hint, auto-complete.
+- **Variantes actuales:** Classic (solo expuestas), Relaxed (cualquier carta visible).
+
+---
+
 ## Hito 5 — Multi-juego (completado)
 
 - [x] Arquitectura multi-juego con `gameRegistry.js`
 - [x] Klondike, Spider, FreeCell, Pyramid registrados
 - [x] Cada juego en `src/games/<name>/` con `index.js`, `logic.js`, `renderer.js`
-- [x] Opciones por juego (draw mode, scoring mode, dificultad)
+- [x] Opciones por juego
 - [x] Nav dinámica
 - [x] Bugs de undo corregidos en todos los juegos
 
 ---
 
-## Reglas oficiales vs implementación actual
-
-### Klondike
-- **Estándar:** 7 columnas, draw 1 o 3, foundations A→K por palo, tableau K→A alternando colores, fondación→tablaú permitido en variantes relajadas.
-- **Implementación actual:** draw 1/3, standard/vegas scoring, foundation→tableau permitido, undo, hint, auto-complete.
-- **Variantes a agregar:** Relaxed (permite cualquier carta en columna vacía), Strict (no foundation→tableau).
-
-### Spider
-- **Estándar:** 2 mazos, 10 columnas, 6×6 + 4×5 deal, draw 10, runs K→A del mismo palo para retirar, movimiento solo por rango descendente (sin restricción de palo para apilar).
-- **Implementación actual:** 1/2/4 palos (corregido), draw 10, runs K→A detectadas, undo corregido.
-- **Variantes a agregar:** Relaxed (permitir apilar mismo palo solo), Strict (no undo), contador de runs completadas visibles.
-
-### FreeCell
-- **Estándar:** 8 columnas (4×7 + 4×6), 4 free cells, 4 foundations, alternar colores en tableau, fórmula de supermove `(free cells + 1) × 2^empty_columns`.
-- **Implementación actual:** alternar colores, fórmula simplificada `2^(free cells + 1)`, undo corregido.
-- **Variantes a agregar:** Baker's Game (mismo palo en tableau en vez de alternar colores), fórmula de supermove correcta, Easy (siempre winnable deals).
-
-### Pyramid
-- **Estándar:** 28 cartas en pirámide, 24 en stock, pares que suman 13, K solo, solo cartas expuestas.
-- **Implementación actual:** reglas estándar, undo, hint, auto-complete.
-- **Variantes a agregar:** Relaxed Pyramid (permitir emparejar cartas no expuestas), scoring por tiempo.
-
----
-
 ## Hito 6 — Pulido y personalización
 
-### 6.0 Corregir bugs restantes (highest priority)
-- [x] Verificar que undo no pierda cartas en ningún juego tras múltiples movimientos
-- [x] Verificar que `__spiderState__`, `__freecellState__` se remuevan del build final
-- [x] Revisar que los `id` de cartas no se repitan (FreeCell usaba nombres de palo + rango, únicos por mazo; Spider usa índices de copia)
-- [x] Timer: arrancar en creación de partida, no en primer movimiento
-- [x] Timer display: no reiniciar intervalo en cada render (evita saltos/parpadeos)
-- [x] Estadísticas: contar partida abandonada al apretar "New Game" con movimientos > 0
+### 6.0 Bugs restantes
+- [x] Undo no pierde cartas en ningún juego
+- [x] Variables de debug removidas del build
+- [x] IDs de carta únicos
+- [x] Timer arranca en creación de partida
+- [x] Timer display sin saltos
+- [x] Partida abandonada contada al apretar "New Game"
 
-### 6.1 Responsive + botonera vertical (highest UI priority)
-- [x] Rehacer botonera inferior como columna vertical flotante/derecha sin ocupar ancho del tablero
-- [x] Ancho mínimo por columna de carta que no se solape en pantallas medianas
-- [x] Escala proporcional de cartas según viewport (CSS clamp / scale)
-- [x] Layout que funcione en ventanas no maximizadas (ej. 900px, 700px)
-- [x] Tap targets mínimos 44×44 en móvil
-- [x] Evitar solapamiento de columnas en Spider (10 cols) y FreeCell (8 cols)
+### 6.1 Responsive + botonera vertical
+- [x] Botonera vertical derecha
+- [x] Responsive hasta móvil pequeño
+- [x] Tap targets ≥ 44×44
+- [x] Sin solapamiento en Spider/FreeCell
 
-### 6.2 Personalización de reglas por juego
-- [x] **Klondike:**
-  - Relaxed mode (cualquier rey en columna vacía vs solo K)
-  - Strict mode (no foundation→tableau)
-  - Draw 1 / Draw 3
-  - Standard / Vegas scoring
-- [x] **Spider:**
-  - 1 / 2 / 4 suits
-  - Mostrar contador de runs completadas (0/8)
-  - Opción: permitir mover runs solo si son mismo palo (más estricta)
-- [x] **FreeCell:**
-  - Classic (alternar colores)
-  - Baker's Game (mismo palo en tableau)
-  - Supermove fórmula real: `(freeCells + 1) * 2^emptyColumns`
-- [x] **Pyramid:**
-  - Classic (solo expuestas)
-  - Relaxed (cualquier carta visible)
-  - Scoring por tiempo restante
+### 6.2 Personalización de reglas
+- [x] Klondike: draw 1/3, standard/vegas, relaxed/strict
+- [x] Spider: 1/2/4 suits, classic/strict
+- [x] FreeCell: classic, baker's game
+- [x] Pyramid: classic, relaxed
 
-### 6.2 UI/UX refinada
-- [x] Animaciones de movimiento consistentes entre juegos (no solo full rebuild)
-- [x] Estado visual de selección más claro
-- [x] Mejoras de responsive en móvil (columnas más angostas, tap targets)
-- [x] Opción de card back selectable (al menos 2 diseños)
+### 6.3 UI/UX refinada
+- [x] Animaciones de reparto
+- [x] Selección visual clara
+- [x] Responsive móvil
+- [x] Opción de card back
 
-### 6.3 Accesibilidad
+### 6.4 Accesibilidad
 - [x] Aria labels en cartas, columnas y botones
-- [x] Navegación por teclado (tab + enter/espacio)
-- [x] Focus management visible
-- [x] Contraste de colores verificado
+- [x] Navegación por teclado
+- [x] Focus visible
+- [x] Contraste verificado
 
-### 6.4 Sonido
-- [x] Volumen ajustable
-- [x] Sonidos individuales on/off (slide, foundation, victory)
-- [x] Mantener off por default
+### 6.5 Sonido
+- [x] Web Audio API sounds
+- [x] Volumen global
+- [x] Toggles por tipo
+- [x] Off por default
 
-### 6.5 Tests
-- [x] `vitest` + `happy-dom`
-- [x] Tests de lógica para cada juego (creación, movimientos, undo, win)
-- [x] Pre-commit hook con `simple-git-hooks`
+### 6.6 Tests y quality gates
+- [x] vitest + happy-dom
+- [x] Tests de lógica por juego
+- [x] Pre-commit hook con Biome + tests + build
 
-### 6.6 Lighthouse
-- [~] Score ≥ 90 en Performance, Accessibility, Best Practices
-  - Actual: Accessibility 100, Best Practices 100, SEO 100, Performance 80
-  - Bloqueado por CLS 0.42 del renderizado inicial del tablero en `#game-container`. Requiere refactor del renderer para hidratar estructura estática o estructura base pre-renderizada.
-- [x] SEO básico para juego web
+### 6.7 Lighthouse
+- [x] SEO 100
+- [x] Accessibility 100
+- [x] Best Practices 100
+- [~] Performance 80 — bloqueado por CLS 0.42 del renderizado inicial de `#game-container`.
 
-### 6.7 PWA
-- [x] Manifest con iconos PNG 192/512
-- [x] Service worker propio (`public/sw.js`) con cache de shell/assets
-- [x] Registro funcionando, sin errores de consola
+### 6.8 PWA
+- [x] Manifest e iconos 192/512
+- [x] Service worker con cache de shell
+- [x] Registro correcto
 
-### 6.8 Persistencia
-- [ ] Guardar partida en curso por juego (localStorage)
-- [ ] Resumir al volver
+### 6.9 Persistencia
+- [x] Guardar partida por juego en localStorage
+- [x] Resumir al volver
+- [x] Limpiar slot en New Game / win
 
-### 6.9 Custom domain (opcional)
+### 6.10 Custom domain (opcional)
 - [ ] Comprar dominio
 - [ ] Configurar CNAME en GitHub Pages
 
@@ -130,20 +117,16 @@
 
 ## Hito 7 — Nuevos juegos (futuro)
 
-- [ ] Yukon (similar a Klondike pero todas las cartas visibles y movimiento libre de grupos)
+- [ ] Yukon (todas visibles, movimiento libre de grupos)
 - [ ] TriPeaks
 - [ ] Golf
 - [ ] Canfield / Forty Thieves
 
 ---
 
-## Justificación del cambio
+## Notas de versión
 
-Se descubrió que los bugs de undo eran críticos y afectaban la confiabilidad de todos los juegos. Por eso se prioriza:
-
-1. **Stabilidad:** cerrar definitivamente bugs de undo y reglas.
-2. **Personalización:** agregar variantes conocidas (Relaxed, Baker's Game) que aumentan replayability sin inventar reglas.
-3. **Accesibilidad:** Gonzalo tiene especialización activa en a11y; el producto debe reflejarlo.
-4. **Tests + pre-commit hooks:** regla de proyecto obligatoria, no negociable.
-5. **PWA:** mejora experiencia móvil, que ya es un constraint declarado.
-6. **Más juegos:** solo después de que los 4 actuales sean sólidos y accesibles.
+### v1.0.0 — 2026-08-01
+- Lanzamiento inicial con 4 juegos completos.
+- PWA, persistencia, sonido, estadísticas, accesibilidad.
+- Lighthouse A/BP/S en 100, Performance 80 por CLS pendiente.
